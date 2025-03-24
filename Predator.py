@@ -3,9 +3,9 @@ import pygame
 import random
 
 
-class Sheep(Agent):
+class Predator(Agent):
     def __init__(self, x, y, size, screen, WIDTH, HEIGHT):
-        self.icon = pygame.transform.scale(pygame.image.load("assets/noun-sheep-4744242.png"), (size, size))
+        self.icon = pygame.transform.scale(pygame.image.load("assets/noun-wolf-7401722.png"), (size, size))
         self.position = self.icon.get_rect()
         self.position = pygame.Vector2(x, y)
         self.velocity = pygame.Vector2(random.uniform(-2, 2), random.uniform(-2, 2))

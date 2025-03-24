@@ -1,7 +1,8 @@
 import pygame
 import random
 from Sheep import Sheep
-from Agent import Agent
+from Llama import Llama
+from Predator import Predator
 
 # Initialize Pygame
 pygame.init()
@@ -17,9 +18,9 @@ RED = (255, 0, 0)
 
 # Create agents
 num_sheep = 10
-sheep = [Sheep(random.randint(100, WIDTH - 100), random.randint(100, HEIGHT - 100), screen, WIDTH, HEIGHT) for _ in range(num_sheep)]
-llamas = [Agent(400, 300, GREEN, screen, WIDTH, HEIGHT)]
-predators = [Agent(700, 300, RED, screen, WIDTH, HEIGHT)]
+sheep = [Sheep(random.randint(100, WIDTH - 100), random.randint(100, HEIGHT - 100), 50, screen, WIDTH, HEIGHT) for _ in range(num_sheep)]
+llamas = [Llama(400, 300, 100, screen, WIDTH, HEIGHT)]
+predators = [Predator(700, 300, 80, screen, WIDTH, HEIGHT)]
 
 # Main loop
 running = True
@@ -39,7 +40,7 @@ while running:
     
     for l in llamas:
         l.draw()
-    
+
     for p in predators:
         p.move()
         p.draw()

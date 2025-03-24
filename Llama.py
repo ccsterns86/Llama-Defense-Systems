@@ -2,10 +2,11 @@ from Agent import Agent
 import pygame
 import random
 
+WHITE = (255, 255, 255)
 
-class Sheep(Agent):
+class Llama(Agent):
     def __init__(self, x, y, size, screen, WIDTH, HEIGHT):
-        self.icon = pygame.transform.scale(pygame.image.load("assets/noun-sheep-4744242.png"), (size, size))
+        self.icon = pygame.transform.scale(pygame.image.load("assets/noun-llama-7034038.png"), (size, size))
         self.position = self.icon.get_rect()
         self.position = pygame.Vector2(x, y)
         self.velocity = pygame.Vector2(random.uniform(-2, 2), random.uniform(-2, 2))
