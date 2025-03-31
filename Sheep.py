@@ -6,6 +6,7 @@ import noise
 class Sheep(Agent):
     def __init__(self, x, y, size, screen, WIDTH, HEIGHT):
         self.icon = pygame.transform.scale(pygame.image.load("assets/noun-sheep-4744242.png"), (size, size))
+        self.icon_dead = pygame.transform.scale(pygame.image.load("assets/dead-sheep.png"), (size, size))
         self.position = pygame.Vector2(x, y)
         self.velocity = pygame.Vector2(random.uniform(-1, 1), random.uniform(-1, 1))
         self.acceleration = pygame.Vector2(0, 0)
@@ -17,8 +18,21 @@ class Sheep(Agent):
         self.HEIGHT = HEIGHT
         self.size = size
         self.noise_time = random.uniform(0, 1000)
+        self.is_alive = True
 
-    def move(self, predators): 
+    def update_values(self, values):
+        for item in values:
+            if item == "max_speed":
+                self.max_speed = values[item]
+            elif item == "max_force":
+                self.max_force = values[item]
+            elif item == "perception":
+                self.perception_radius = values[item]
+
+    def move(self, predators):
+        if not self.is_alive:
+            return
+
         self.wander()
 
         danger_zone = self.perception_radius / 2
@@ -47,6 +61,7 @@ class Sheep(Agent):
         self.acceleration *= 0
 
     def wander(self):
+
         # Applies a small random force to create a wandering effect.
         wander_strength = 0.3  # Adjust this value for more or less wandering
 
@@ -62,6 +77,9 @@ class Sheep(Agent):
         self.acceleration += force
 
     def edges(self):
+        if not self.is_alive:
+            return
+
         buffer = 30 # Distance before turning
         turn_strength = 0.3 # How sharply they turn
 
@@ -76,6 +94,9 @@ class Sheep(Agent):
             self.apply_force(pygame.Vector2(0, turn_strength))
     
     def flock(self, sheeps, predators):
+        if not self.is_alive:
+            return
+
         alignment = self.align(sheeps)
         cohesion = self.cohere(sheeps)
         separation = self.separate(sheeps)
@@ -88,6 +109,7 @@ class Sheep(Agent):
         self.apply_force(flee * 2.0)
 
     def flee(self, predators):
+
         flee_force = pygame.Vector2(0, 0)
         for predator in predators:
             distance = self.position.distance_to(predator.position)
@@ -103,6 +125,7 @@ class Sheep(Agent):
         return flee_force
     
     def align(self, sheeps):
+
         # Steer towards average heading of neighbors
         total = 0
         avg_velocity = pygame.Vector2(0, 0)
@@ -157,7 +180,17 @@ class Sheep(Agent):
                     steer = steer.normalize() * self.max_force
                 return steer
         return pygame.Vector2(0, 0)
+
+    def die(self):
+        if not self.is_alive:
+            return
+        self.is_alive = False
     
     def draw(self):
-        self.screen.blit(self.icon, self.position)
+        if self.is_alive:
+            self.screen.blit(self.icon, self.position)
+        else:
+            self.screen.blit(self.icon_dead, self.position)
+
+
 

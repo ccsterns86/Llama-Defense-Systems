@@ -16,6 +16,10 @@ class Predator(Agent):
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
         self.size = size
+        self.max_attack_frequency = 100
+        self.ticks_since_last_attack = 100
+        self.attack_radius = 25
+
 
     def move(self, llamas):
         danger_zone = self.perception_radius / 2
@@ -42,6 +46,9 @@ class Predator(Agent):
         if self.velocity.length() > 0:
             self.velocity = self.velocity.normalize() * min(self.velocity.length(), self.max_speed)
         self.acceleration *= 0
+
+        # update attack counter
+        self.ticks_since_last_attack += 1
 
     def apply_force(self, force):
         self.acceleration += force
@@ -140,6 +147,16 @@ class Predator(Agent):
                     steer = steer.normalize() * self.max_force
                 return steer
         return pygame.Vector2(0, 0)
+
+    def can_attack(self):
+        return self.ticks_since_last_attack > self.max_attack_frequency
+
+    def attack(self, sheeps):
+        for sheep in sheeps:
+            distance = self.position.distance_to(sheep.position)
+            if distance < self.attack_radius and self.can_attack():
+                sheep.die()
+                self.ticks_since_last_attack = 0
     
     def draw(self):
         self.screen.blit(self.icon, self.position)
