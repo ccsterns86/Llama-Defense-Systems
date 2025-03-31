@@ -20,6 +20,15 @@ class Sheep(Agent):
         self.noise_time = random.uniform(0, 1000)
         self.is_alive = True
 
+    def update_values(self, values):
+        for item in values:
+            if item == "max_speed":
+                self.max_speed = values[item]
+            elif item == "max_force":
+                self.max_force = values[item]
+            elif item == "perception":
+                self.perception_radius = values[item]
+
     def move(self, predators):
         if not self.is_alive:
             return
