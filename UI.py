@@ -1,4 +1,4 @@
-# Slider class to handle the individual sliders
+# Handles UI Elements
 import pygame
 
 # Colors
@@ -13,8 +13,7 @@ RED = (255, 0, 0)
 WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH + 200, HEIGHT))
 
-
-
+# Sliders for value adjustment
 class Slider:
     def __init__(self, x, y, width, height, min_val, max_val, current_val):
         self.rect = pygame.Rect(x, y, width, height)
@@ -46,6 +45,7 @@ class Slider:
                 # Update the value based on the slider position
                 self.value = self.min_val + (float(x - self.rect.left)) / self.width * (self.max_val - self.min_val)
 
+# UI Controls
 class ControlScreen:
     def __init__(self):
         self.font = pygame.font.SysFont(None, 24)
@@ -69,6 +69,7 @@ class ControlScreen:
         value_text3 = self.font.render(f"Perception: {int(self.slider3.value)}", True, WHITE)
         screen.blit(value_text3, (self.slider3.rect.left, self.slider3.rect.top - 17))
 
+        # Return all values to use for updates
         for event in pygame.event.get():
             self.slider1.handle_event(event)
             self.slider2.handle_event(event)

@@ -23,8 +23,8 @@ predators = [Predator(700, 300, 80, UI.screen, UI.WIDTH, UI.HEIGHT)]
 background = pygame.image.load("assets/background.jpg")
 background = pygame.transform.scale(background, (UI.WIDTH, UI.HEIGHT))
 
+# create control screen
 control_screen = UI.ControlScreen()
-
 font = pygame.font.SysFont(None, 24)
 
 # Main loop
@@ -61,6 +61,7 @@ while running:
         p.edges()
         p.draw()
 
+    # Display sheep counter
     UI.screen.blit(font.render(f"{alive_sheep_count} remaining sheep", True, UI.WHITE), (UI.WIDTH + 25, UI.HEIGHT - 20))
 
     pygame.display.flip()
