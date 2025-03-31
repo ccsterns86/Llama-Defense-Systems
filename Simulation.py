@@ -51,6 +51,7 @@ while running:
     for p in predators:
         p.flock(sheep, llamas)
         p.move(llamas)
+        p.attack(sheep)
         p.edges()
         p.draw()
 

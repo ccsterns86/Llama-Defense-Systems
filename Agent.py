@@ -13,7 +13,7 @@ class Agent:
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
 
-    def move(self):
+    def move(self, _):
         self.icon_rect.x += random.choice([-1, 0, 1]) * self.speed
         self.icon_rect.y += random.choice([-1, 0, 1]) * self.speed
         self.icon_rect.x = max(0, min(self.WIDTH, self.icon_rect.x))
