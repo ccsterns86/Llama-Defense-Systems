@@ -19,22 +19,20 @@ class Llama(Agent):
         self.HEIGHT = HEIGHT
         self.size = size
         self.noise_time = random.uniform(0, 1000)
-        self.alignmentVal = 0.3
+        self.alignmentVal = 0.1
         self.cohesionVal = 0.4
         self.separationVal = 3.0
         self.defendVal = 2.0
 
     def update_values(self, values):
         for item in values:
-            if item == "alignment":
-                self.alignmentVal = values[item]
-            elif item == "cohesion":
+            if item == "lcohesion":
                 self.cohesionVal = values[item]
-            elif item == "separation":
+            elif item == "lseparation":
                 self.separationVal = values[item]
-            elif item == "defend":
+            elif item == "ldefend":
                 self.fleeVal = values[item]
-            elif item == "perception":
+            elif item == "lperception":
                 self.perception_radius = values[item]
 
     def move(self, predators):
@@ -52,9 +50,9 @@ class Llama(Agent):
 
         # Modify max speed based on the closest predator
         if closest_predator < danger_zone:
-            self.max_speed = 2
+            self.max_speed = 3
         elif closest_predator < alert_zone:
-            self.max_speed = 1.5
+            self.max_speed = 2
         else: # Calm movement (default)
             self.max_speed = 1
         

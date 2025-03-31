@@ -49,6 +49,7 @@ while running:
         s.draw()
 
     for l in llamas:
+        l.update_values(updated_values["llama"])
         l.flock(sheep, predators)
         l.move(predators)
         l.edges()
