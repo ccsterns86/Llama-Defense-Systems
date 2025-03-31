@@ -13,6 +13,8 @@ RED = (255, 0, 0)
 WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH + 200, HEIGHT))
 
+
+
 class Slider:
     def __init__(self, x, y, width, height, min_val, max_val, current_val):
         self.rect = pygame.Rect(x, y, width, height)

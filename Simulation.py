@@ -9,12 +9,13 @@ from Predator import Predator
 # Initialize Pygame
 pygame.init()
 
-
 clock = pygame.time.Clock()
 
 # Create agents
 num_sheep = 10
-sheep = [Sheep(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 50, UI.screen, UI.WIDTH, UI.HEIGHT) for _ in range(num_sheep)]
+sheep = [
+    Sheep(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 50, UI.screen, UI.WIDTH, UI.HEIGHT)
+    for _ in range(num_sheep)]
 llamas = [Llama(400, 300, 100, UI.screen, UI.WIDTH, UI.HEIGHT)]
 predators = [Predator(700, 300, 80, UI.screen, UI.WIDTH, UI.HEIGHT)]
 
@@ -24,6 +25,7 @@ background = pygame.transform.scale(background, (UI.WIDTH, UI.HEIGHT))
 
 control_screen = UI.ControlScreen()
 
+font = pygame.font.SysFont(None, 24)
 
 # Main loop
 running = True
@@ -35,15 +37,17 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-
     # Move and draw agents
+    alive_sheep_count = 0
     for s in sheep:
         s.update_values(updated_values["sheep"])
         s.flock(sheep, predators)
         s.move(predators)
         s.edges()
+        if s.is_alive:
+            alive_sheep_count += 1
         s.draw()
-    
+
     for l in llamas:
         l.flock(sheep, predators)
         l.move(predators)
@@ -56,6 +60,8 @@ while running:
         p.attack(sheep)
         p.edges()
         p.draw()
+
+    UI.screen.blit(font.render(f"{alive_sheep_count} remaining sheep", True, UI.WHITE), (UI.WIDTH + 25, UI.HEIGHT - 20))
 
     pygame.display.flip()
     clock.tick(30)  # 30 FPS
