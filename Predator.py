@@ -6,46 +6,85 @@ import random
 class Predator(Agent):
     def __init__(self, x, y, size, screen, WIDTH, HEIGHT):
         self.icon = pygame.transform.scale(pygame.image.load("assets/noun-wolf-7401722.png"), (size, size))
-        self.position = self.icon.get_rect()
         self.position = pygame.Vector2(x, y)
         self.velocity = pygame.Vector2(random.uniform(-2, 2), random.uniform(-2, 2))
         self.acceleration = pygame.Vector2(0, 0)
         self.max_speed = 3
         self.max_force = 0.05
-        self.perception_radius = 50
+        self.perception_radius = 100
         self.screen = screen
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
+        self.size = size
 
-    def move(self):
+    def move(self, llamas):
+        danger_zone = self.perception_radius / 2
+        # alert_zone = self.perception_radius * 1.5
+
+        closest_llama = float("inf")
+
+        for llama in llamas:
+            distance = self.position.distance_to(llama.position)
+            if distance < closest_llama:
+                closest_llama = distance
+
+        # Modify max speed based on the closest predator
+        if closest_llama < danger_zone:
+            self.max_speed = 3
+        # elif closest_llama < alert_zone:
+        #     self.max_speed = 2
+        else: # Calm movement (default)
+            self.max_speed = 2
+        
+        # Move the predator
         self.position += self.velocity
         self.velocity += self.acceleration
-        self.velocity = self.velocity.normalize() * min(self.velocity.length(), self.max_speed)
+        if self.velocity.length() > 0:
+            self.velocity = self.velocity.normalize() * min(self.velocity.length(), self.max_speed)
         self.acceleration *= 0
 
     def apply_force(self, force):
         self.acceleration += force
 
     def edges(self):
-        if self.position.x > self.WIDTH:
-            self.position.x = self.WIDTH
-        elif self.position.x < 0:
-            self.position.x = 0
-        if self.position.y > self.HEIGHT:
-            self.position.y = self.HEIGHT
-        elif self.position.y < 0:
-            self.position.y = 0
+        buffer = 30 # Distance before turning
+        turn_strength = 0.3 # How sharply they turn
+
+        if self.position.x > self.WIDTH - self.size - buffer:
+            self.apply_force(pygame.Vector2(-turn_strength, 0))
+        elif self.position.x < buffer:
+            self.apply_force(pygame.Vector2(turn_strength, 0))
+            
+        if self.position.y > self.HEIGHT - self.size - buffer:
+            self.apply_force(pygame.Vector2(0, -turn_strength))
+        elif self.position.y < buffer:
+            self.apply_force(pygame.Vector2(0, turn_strength))
     
-    def flock(self, sheeps):
+    def flock(self, sheeps, llamas):
         alignment = self.align(sheeps)
         cohesion = self.cohere(sheeps)
-        separation = self.separate(sheeps)
+        flee = self.flee(llamas)
 
         # Apply forces with weights
         self.apply_force(alignment * 1.0)
         self.apply_force(cohesion * 0.8)
-        self.apply_force(separation * 1.50)
-    
+        self.apply_force(flee * 2.0)
+
+    def flee(self, llamas):
+        flee_force = pygame.Vector2(0, 0)
+        for llama in llamas:
+            distance = self.position.distance_to(llama.position)
+            if distance < self.perception_radius * 1.5: # Larger perception radius for predators
+                diff = self.position - llama.position
+                diff = diff.normalize() * self.max_speed # Move in opposite direction
+                flee_force += diff
+        if flee_force.length() > 0:
+            flee_force = flee_force.normalize() * self.max_speed
+            flee_force -= self.velocity
+            if flee_force.length() > self.max_force:
+                flee_force = flee_force.normalize() * self.max_force
+        return flee_force
+
     def align(self, sheeps):
         # Steer towards average heading of neighbors
         total = 0

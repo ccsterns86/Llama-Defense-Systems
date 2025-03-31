@@ -22,10 +22,14 @@ sheep = [Sheep(random.randint(100, WIDTH - 100), random.randint(100, HEIGHT - 10
 llamas = [Llama(400, 300, 100, screen, WIDTH, HEIGHT)]
 predators = [Predator(700, 300, 80, screen, WIDTH, HEIGHT)]
 
+# background
+background = pygame.image.load("assets/background.jpg")
+background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+
 # Main loop
 running = True
 while running:
-    screen.fill((0, 0, 0))
+    screen.blit(background, (0, 0))
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -33,16 +37,21 @@ while running:
 
     # Move and draw agents
     for s in sheep:
-        s.flock(sheep)
-        s.move()
+        s.flock(sheep, predators)
+        s.move(predators)
         s.edges()
         s.draw()
     
     for l in llamas:
+        l.flock(sheep, predators)
+        l.move(predators)
+        l.edges()
         l.draw()
 
     for p in predators:
-        p.move()
+        p.flock(sheep, llamas)
+        p.move(llamas)
+        p.edges()
         p.draw()
 
     pygame.display.flip()
