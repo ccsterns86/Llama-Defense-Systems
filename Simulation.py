@@ -12,7 +12,7 @@ pygame.init()
 clock = pygame.time.Clock()
 
 # Create agents
-num_sheep = 10
+num_sheep = 100
 sheep = [
     Sheep(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 50, UI.screen, UI.WIDTH, UI.HEIGHT)
     for _ in range(num_sheep)]

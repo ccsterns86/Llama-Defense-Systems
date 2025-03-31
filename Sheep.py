@@ -12,20 +12,28 @@ class Sheep(Agent):
         self.acceleration = pygame.Vector2(0, 0)
         self.max_speed = 1
         self.max_force = 0.05
-        self.perception_radius = 100
+        self.perception_radius = 55
         self.screen = screen
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
         self.size = size
         self.noise_time = random.uniform(0, 1000)
         self.is_alive = True
+        self.alignmentVal = 0.3
+        self.cohesionVal = 0.65
+        self.separationVal = 3.0
+        self.fleeVal = 2.0
 
     def update_values(self, values):
         for item in values:
-            if item == "max_speed":
-                self.max_speed = values[item]
-            elif item == "max_force":
-                self.max_force = values[item]
+            if item == "alignment":
+                self.alignmentVal = values[item]
+            elif item == "cohesion":
+                self.cohesionVal = values[item]
+            elif item == "separation":
+                self.separationVal = values[item]
+            elif item == "flee":
+                self.fleeVal = values[item]
             elif item == "perception":
                 self.perception_radius = values[item]
 
@@ -103,10 +111,10 @@ class Sheep(Agent):
         flee = self.flee(predators)
 
         # Apply forces with weights
-        self.apply_force(alignment * 0.8)
-        self.apply_force(cohesion * 1.2)
-        self.apply_force(separation * 1.5)
-        self.apply_force(flee * 2.0)
+        self.apply_force(alignment * self.alignmentVal)
+        self.apply_force(cohesion * self.cohesionVal)
+        self.apply_force(separation * self.separationVal)
+        self.apply_force(flee * self.fleeVal)
 
     def flee(self, predators):
 
