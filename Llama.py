@@ -19,6 +19,23 @@ class Llama(Agent):
         self.HEIGHT = HEIGHT
         self.size = size
         self.noise_time = random.uniform(0, 1000)
+        self.alignmentVal = 0.3
+        self.cohesionVal = 0.4
+        self.separationVal = 3.0
+        self.defendVal = 2.0
+
+    def update_values(self, values):
+        for item in values:
+            if item == "alignment":
+                self.alignmentVal = values[item]
+            elif item == "cohesion":
+                self.cohesionVal = values[item]
+            elif item == "separation":
+                self.separationVal = values[item]
+            elif item == "defend":
+                self.fleeVal = values[item]
+            elif item == "perception":
+                self.perception_radius = values[item]
 
     def move(self, predators):
         self.wander()
@@ -84,10 +101,10 @@ class Llama(Agent):
         defend = self.defend(predators)
 
         # Apply forces with weights
-        self.apply_force(alignment * 1.0)
-        self.apply_force(cohesion * 0.8)
-        self.apply_force(separation * 1.50)
-        self.apply_force(defend * 2.0)
+        self.apply_force(alignment * self.alignmentVal)
+        self.apply_force(cohesion * self.cohesionVal)
+        self.apply_force(separation * self.separationVal)
+        self.apply_force(defend * self.defendVal)
     
     def defend(self, predators):
         defend_force = pygame.Vector2(0, 0)

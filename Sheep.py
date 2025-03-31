@@ -20,7 +20,7 @@ class Sheep(Agent):
         self.noise_time = random.uniform(0, 1000)
         self.is_alive = True
         self.alignmentVal = 0.3
-        self.cohesionVal = 0.65
+        self.cohesionVal = 0.4
         self.separationVal = 3.0
         self.fleeVal = 2.0
 
