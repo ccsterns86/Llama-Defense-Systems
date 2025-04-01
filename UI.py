@@ -96,7 +96,7 @@ class ControlScreen:
         ]
         self.predator_sliders = [
             {"label": label,
-             "slider": Slider(label, WIDTH + 225, 100 + (self.slider_spacing * i), 150, self.slider_height,
+             "slider": Slider(label, WIDTH + 225, 80 + (self.slider_spacing * i), 150, self.slider_height,
                               min_val, max_val, default_val)}
             for i, (label, min_val, max_val, default_val) in enumerate(predator_slider_specs)
         ]
