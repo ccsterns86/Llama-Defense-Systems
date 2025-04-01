@@ -19,6 +19,20 @@ class Predator(Agent):
         self.max_attack_frequency = 100
         self.ticks_since_last_attack = 100
         self.attack_radius = 25
+        self.alignmentVal = 1.0
+        self.cohesionVal = 0.8
+        self.fleeVal = 2.0
+
+    def update_values(self, values):
+        for item in values:
+            if item == "cohesion":
+                self.cohesionVal = values[item]
+            elif item == "flee":
+                self.fleeVal = values[item]
+            elif item == "perception":
+                self.perception_radius = values[item]
+            elif item == "attack time":
+                self.max_attack_frequency = values[item]
 
 
     def move(self, llamas):
@@ -86,9 +100,10 @@ class Predator(Agent):
         flee = self.flee(llamas)
 
         # Apply forces with weights
-        self.apply_force(alignment * 1.0)
-        self.apply_force(cohesion * 0.8)
-        self.apply_force(flee * 2.0)
+        # Apply forces with weights
+        self.apply_force(alignment * self.alignmentVal)
+        self.apply_force(cohesion * self.cohesionVal)
+        self.apply_force(flee * self.fleeVal)
 
     def flee(self, llamas):
         flee_force = pygame.Vector2(0, 0)

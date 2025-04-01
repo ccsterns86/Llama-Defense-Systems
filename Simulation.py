@@ -56,6 +56,7 @@ while running:
         l.draw()
 
     for p in predators:
+        p.update_values(updated_values["predator"])
         p.flock(sheep, llamas)
         p.move(llamas)
         p.attack(sheep)

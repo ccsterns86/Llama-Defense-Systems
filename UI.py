@@ -59,7 +59,7 @@ class ControlScreen:
 
         # Sheep sliders
         sheep_slider_specs = [
-            # (name, height, lowVal, highVal, presetVal)
+            # (name, lowVal, highVal, presetVal)
             ("Alignment", 0, 2.0, 0.3),
             ("Cohesion", 0, 2.0, 0.65),
             ("Separation", 0, 3.0, 3.0),
@@ -74,7 +74,7 @@ class ControlScreen:
         # Llama sliders
         start_point = (len(sheep_slider_specs)*self.slider_spacing) + self.intra_species_sep + (3 * self.text_height )
         llama_slider_specs = [
-            # (name, height, lowVal, highVal, presetVal)
+            # (name, lowVal, highVal, presetVal)
             ("Cohesion", 0, 2.0, 0.65),
             ("Separation", 0, 3.0, 3.0),
             ("Defend", 0, 4.0, 2.0),
@@ -83,6 +83,21 @@ class ControlScreen:
         self.llama_sliders = [
             {"label": label, "slider": Slider(label, WIDTH + 25, start_point + (self.slider_spacing * i), 150, self.slider_height, min_val, max_val, default_val)}
             for i, (label, min_val, max_val, default_val) in enumerate(llama_slider_specs)
+        ]
+
+        # Predator sliders
+        predator_slider_specs = [
+            # (name, lowVal, highVal, presetVal)
+            ("Cohesion", 0, 2.0, 0.65),
+            ("Flee", 0, 4.0, 2.0),
+            ("Perception", 0, 300, 55),
+            ("Attack Time", 0, 200, 100),
+        ]
+        self.predator_sliders = [
+            {"label": label,
+             "slider": Slider(label, WIDTH + 225, 60 + (self.slider_spacing * i), 150, self.slider_height,
+                              min_val, max_val, default_val)}
+            for i, (label, min_val, max_val, default_val) in enumerate(predator_slider_specs)
         ]
 
     def draw(self):
@@ -103,11 +118,20 @@ class ControlScreen:
             slider.draw(screen)
             llama_values[label.lower()] = slider.value  # Store values in dictionary
 
+        screen.blit(self.font.render("Predator", True, WHITE), (WIDTH + 225, 10))
+        predator_values = {}
+        for slider_data in self.predator_sliders:
+            label, slider = slider_data["label"], slider_data["slider"]
+            slider.draw(screen)
+            predator_values[label.lower()] = slider.value  # Store values in dictionary
+
         # # Return all values to use for updates
         for event in pygame.event.get():
             for slider_data in self.sheep_sliders:
                 slider_data["slider"].handle_event(event)
             for slider_data in self.llama_sliders:
                 slider_data["slider"].handle_event(event)
+            for slider_data in self.predator_sliders:
+                slider_data["slider"].handle_event(event)
 
-        return {"sheep": sheep_values, "llama": llama_values}
+        return {"sheep": sheep_values, "llama": llama_values, "predator": predator_values}

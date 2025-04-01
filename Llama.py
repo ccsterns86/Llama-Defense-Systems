@@ -31,7 +31,7 @@ class Llama(Agent):
             elif item == "separation":
                 self.separationVal = values[item]
             elif item == "defend":
-                self.fleeVal = values[item]
+                self.defendVal = values[item]
             elif item == "perception":
                 self.perception_radius = values[item]
 
