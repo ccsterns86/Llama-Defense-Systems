@@ -22,6 +22,7 @@ class Predator(Agent):
         self.alignmentVal = 1.0
         self.cohesionVal = 0.8
         self.fleeVal = 2.0
+        self.health = 5
 
     def update_values(self, values):
         for item in values:
@@ -185,6 +186,14 @@ class Predator(Agent):
             if sheep.is_alive and distance < self.attack_radius and self.can_attack():
                 sheep.die()
                 self.ticks_since_last_attack = 0
+                self.health += 1
+
+    def check_health(self, llamas):
+        for llama in llamas:
+            distance = self.position.distance_to(llama.position)
+            if distance < self.attack_radius and self.can_attack():
+                self.ticks_since_last_attack = 0
+                self.health -= 1
     
     def draw(self):
         self.screen.blit(self.icon, self.position)

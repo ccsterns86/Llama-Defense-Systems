@@ -57,9 +57,11 @@ while running:
 
     for p in predators:
         p.update_values(updated_values["predator"])
+        control_screen.set_display_vals(p.health)
         p.flock(sheep, llamas)
         p.move(llamas)
         p.attack(sheep)
+        p.check_health(llamas)
         p.edges()
         p.draw()
 
