@@ -11,7 +11,7 @@ RED = (255, 0, 0)
 
 # Screen settings
 WIDTH, HEIGHT = 800, 600
-screen = pygame.display.set_mode((WIDTH + 200, HEIGHT))
+screen = pygame.display.set_mode((WIDTH + 400, HEIGHT))
 
 # Sliders for value adjustment
 class Slider:
@@ -55,7 +55,7 @@ class ControlScreen:
         self.slider_height = 15
         self.text_height = 15
         self.slider_spacing = self.slider_height + self.text_height + 10
-        self.intra_species_sep = 60
+        self.intra_species_sep = 100
 
         # Sheep sliders
         sheep_slider_specs = [
@@ -75,10 +75,10 @@ class ControlScreen:
         start_point = (len(sheep_slider_specs)*self.slider_spacing) + self.intra_species_sep + (3 * self.text_height )
         llama_slider_specs = [
             # (name, height, lowVal, highVal, presetVal)
-            ("LCohesion", 0, 2.0, 0.65),
-            ("LSeparation", 0, 3.0, 3.0),
-            ("LDefend", 0, 4.0, 2.0),
-            ("LPerception", 0, 300, 55),
+            ("Cohesion", 0, 2.0, 0.65),
+            ("Separation", 0, 3.0, 3.0),
+            ("Defend", 0, 4.0, 2.0),
+            ("Perception", 0, 300, 55),
         ]
         self.llama_sliders = [
             {"label": label, "slider": Slider(label, WIDTH + 25, start_point + (self.slider_spacing * i), 150, self.slider_height, min_val, max_val, default_val)}
@@ -86,7 +86,7 @@ class ControlScreen:
         ]
 
     def draw(self):
-        pygame.draw.rect(screen, BLACK, pygame.Rect(WIDTH, 0, WIDTH + 200, HEIGHT))  # right panel
+        pygame.draw.rect(screen, BLACK, pygame.Rect(WIDTH, 0, WIDTH + 400, HEIGHT))  # right panel
         screen.blit(self.font.render("Sheep", True, WHITE), (WIDTH + 25, 10))
 
         # Draw sliders
@@ -101,7 +101,7 @@ class ControlScreen:
         for slider_data in self.llama_sliders:
             label, slider = slider_data["label"], slider_data["slider"]
             slider.draw(screen)
-            sheep_values[label.lower()] = slider.value  # Store values in dictionary
+            llama_values[label.lower()] = slider.value  # Store values in dictionary
 
         # # Return all values to use for updates
         for event in pygame.event.get():

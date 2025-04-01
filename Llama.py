@@ -26,13 +26,13 @@ class Llama(Agent):
 
     def update_values(self, values):
         for item in values:
-            if item == "lcohesion":
+            if item == "cohesion":
                 self.cohesionVal = values[item]
-            elif item == "lseparation":
+            elif item == "separation":
                 self.separationVal = values[item]
-            elif item == "ldefend":
+            elif item == "defend":
                 self.fleeVal = values[item]
-            elif item == "lperception":
+            elif item == "perception":
                 self.perception_radius = values[item]
 
     def move(self, predators):
