@@ -15,7 +15,8 @@ screen = pygame.display.set_mode((WIDTH + 200, HEIGHT))
 
 # Sliders for value adjustment
 class Slider:
-    def __init__(self, x, y, width, height, min_val, max_val, current_val):
+    def __init__(self, label, x, y, width, height, min_val, max_val, current_val):
+        self.font = pygame.font.SysFont(None, 18)
         self.rect = pygame.Rect(x, y, width, height)
         self.min_val = min_val
         self.max_val = max_val
@@ -24,9 +25,13 @@ class Slider:
         self.width = width
         self.slider_rect = pygame.Rect(x + (self.value - self.min_val) / (self.max_val - self.min_val) * width - 10, y,
                                        20, height)
+        self.label = label
         self.dragging = False
 
+
     def draw(self, surface):
+        value_text = self.font.render(f"{self.label}: {self.value:.2f}", True, WHITE)
+        screen.blit(value_text, (self.rect.left, self.rect.top - 15))
         # Draw the track
         pygame.draw.rect(surface, GRAY, self.rect)
         # Draw the slider
@@ -47,33 +52,37 @@ class Slider:
 class ControlScreen:
     def __init__(self):
         self.font = pygame.font.SysFont(None, 24)
+        self.slider_height = 15
+        self.text_height = 15
+        self.slider_spacing = self.slider_height + self.text_height + 10
+        self.intra_species_sep = 60
 
         # Sheep sliders
         sheep_slider_specs = [
             # (name, height, lowVal, highVal, presetVal)
-            ("Alignment", 60, 0, 2.0, 0.3),
-            ("Cohesion", 110, 0, 2.0, 0.65),
-            ("Separation", 160, 0, 3.0, 3.0),
-            ("Flee", 210, 0, 3.0, 2.0),
-            ("Perception", 260, 0, 200, 55),
+            ("Alignment", 0, 2.0, 0.3),
+            ("Cohesion", 0, 2.0, 0.65),
+            ("Separation", 0, 3.0, 3.0),
+            ("Flee", 0, 3.0, 2.0),
+            ("Perception", 0, 200, 55),
         ]
         self.sheep_sliders = [
-            {"label": label, "slider": Slider(WIDTH + 25, y, 150, 20, min_val, max_val, default_val)}
-            for label, y, min_val, max_val, default_val in sheep_slider_specs
+            {"label": label, "slider": Slider(label, WIDTH + 25, 60 + (self.slider_spacing * i), 150, self.slider_height, min_val, max_val, default_val)}
+            for i, (label, min_val, max_val, default_val) in enumerate(sheep_slider_specs)
         ]
 
         # Llama sliders
-        start_point = len(sheep_slider_specs)*50 + 30
+        start_point = (len(sheep_slider_specs)*self.slider_spacing) + self.intra_species_sep + (3 * self.text_height )
         llama_slider_specs = [
             # (name, height, lowVal, highVal, presetVal)
-            ("LCohesion", start_point + 110, 0, 2.0, 0.65),
-            ("LSeparation", start_point + 160, 0, 3.0, 3.0),
-            ("LDefend", start_point + 210, 0, 4.0, 2.0),
-            ("LPerception", start_point + 260, 0, 300, 55),
+            ("LCohesion", 0, 2.0, 0.65),
+            ("LSeparation", 0, 3.0, 3.0),
+            ("LDefend", 0, 4.0, 2.0),
+            ("LPerception", 0, 300, 55),
         ]
         self.llama_sliders = [
-            {"label": label, "slider": Slider(WIDTH + 25, y, 150, 20, min_val, max_val, default_val)}
-            for label, y, min_val, max_val, default_val in llama_slider_specs
+            {"label": label, "slider": Slider(label, WIDTH + 25, start_point + (self.slider_spacing * i), 150, self.slider_height, min_val, max_val, default_val)}
+            for i, (label, min_val, max_val, default_val) in enumerate(llama_slider_specs)
         ]
 
     def draw(self):
@@ -85,22 +94,20 @@ class ControlScreen:
         for slider_data in self.sheep_sliders:
             label, slider = slider_data["label"], slider_data["slider"]
             slider.draw(screen)
-            value_text = self.font.render(f"{label}: {slider.value:.2f}", True, WHITE)
-            screen.blit(value_text, (slider.rect.left, slider.rect.top - 17))
             sheep_values[label.lower()] = slider.value  # Store values in dictionary
+
+        screen.blit(self.font.render("Llama", True, WHITE), (WIDTH + 25, (len(self.sheep_sliders)*self.slider_spacing) + self.intra_species_sep))
         llama_values = {}
         for slider_data in self.llama_sliders:
             label, slider = slider_data["label"], slider_data["slider"]
             slider.draw(screen)
-            value_text = self.font.render(f"{label}: {slider.value:.2f}", True, WHITE)
-            screen.blit(value_text, (slider.rect.left, slider.rect.top - 17))
             sheep_values[label.lower()] = slider.value  # Store values in dictionary
 
-        # Return all values to use for updates
+        # # Return all values to use for updates
         for event in pygame.event.get():
             for slider_data in self.sheep_sliders:
                 slider_data["slider"].handle_event(event)
             for slider_data in self.llama_sliders:
                 slider_data["slider"].handle_event(event)
-        
+
         return {"sheep": sheep_values, "llama": llama_values}

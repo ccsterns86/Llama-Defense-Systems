@@ -22,6 +22,13 @@ class Predator(Agent):
 
 
     def move(self, llamas):
+
+        # update attack counter
+        self.ticks_since_last_attack += 1
+
+        if not self.can_attack():
+            return
+
         danger_zone = self.perception_radius / 2
         # alert_zone = self.perception_radius * 1.5
 
@@ -47,13 +54,15 @@ class Predator(Agent):
             self.velocity = self.velocity.normalize() * min(self.velocity.length(), self.max_speed)
         self.acceleration *= 0
 
-        # update attack counter
-        self.ticks_since_last_attack += 1
 
     def apply_force(self, force):
         self.acceleration += force
 
     def edges(self):
+
+        if not self.can_attack():
+            return
+
         buffer = 30 # Distance before turning
         turn_strength = 0.3 # How sharply they turn
 
@@ -68,6 +77,10 @@ class Predator(Agent):
             self.apply_force(pygame.Vector2(0, turn_strength))
     
     def flock(self, sheeps, llamas):
+
+        if not self.can_attack():
+            return
+
         alignment = self.align(sheeps)
         cohesion = self.cohere(sheeps)
         flee = self.flee(llamas)
@@ -154,7 +167,7 @@ class Predator(Agent):
     def attack(self, sheeps):
         for sheep in sheeps:
             distance = self.position.distance_to(sheep.position)
-            if distance < self.attack_radius and self.can_attack():
+            if sheep.is_alive and distance < self.attack_radius and self.can_attack():
                 sheep.die()
                 self.ticks_since_last_attack = 0
     
