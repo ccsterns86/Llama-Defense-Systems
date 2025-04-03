@@ -30,6 +30,7 @@ font = pygame.font.SysFont(None, 24)
 # Main loop
 running = True
 while running:
+
     UI.screen.blit(background, (0, 0))
     updated_values = control_screen.draw()
 
@@ -56,14 +57,15 @@ while running:
         l.draw()
 
     for p in predators:
-        p.update_values(updated_values["predator"])
-        control_screen.set_display_vals(p.health)
-        p.flock(sheep, llamas)
-        p.move(llamas)
-        p.attack(sheep)
-        p.check_health(llamas)
-        p.edges()
-        p.draw()
+        if p.is_alive:
+            p.update_values(updated_values["predator"])
+            control_screen.set_display_vals(p.health)
+            p.flock(sheep, llamas)
+            p.move(llamas)
+            p.attack(sheep)
+            p.check_health(llamas)
+            p.edges()
+            p.draw()
 
     # Display sheep counter
     UI.screen.blit(font.render(f"{alive_sheep_count} remaining sheep", True, UI.WHITE), (UI.WIDTH + 25, UI.HEIGHT - 20))

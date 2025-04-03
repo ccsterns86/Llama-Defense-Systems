@@ -107,11 +107,12 @@ class Llama(Agent):
     def defend(self, predators):
         defend_force = pygame.Vector2(0, 0)
         for predator in predators:
-            distance = self.position.distance_to(predator.position)
-            if distance < self.perception_radius * 1.5: # Larger perception radius for predators
-                diff = predator.position - self.position # Move toward predator
-                diff = diff.normalize() * self.max_speed 
-                defend_force += diff
+            if predator.is_alive:
+                distance = self.position.distance_to(predator.position)
+                if distance < self.perception_radius * 1.5: # Larger perception radius for predators
+                    diff = predator.position - self.position # Move toward predator
+                    diff = diff.normalize() * self.max_speed 
+                    defend_force += diff
         if defend_force.length() > 0:
             defend_force = defend_force.normalize() * self.max_speed
             defend_force += self.velocity
@@ -124,9 +125,10 @@ class Llama(Agent):
         total = 0
         avg_velocity = pygame.Vector2(0, 0)
         for sheep in sheeps:
-            if self.position.distance_to(sheep.position) < self.perception_radius:
-                avg_velocity += sheep.velocity
-                total += 1
+            if sheep.is_alive:
+                if self.position.distance_to(sheep.position) < self.perception_radius:
+                    avg_velocity += sheep.velocity
+                    total += 1
         if total > 0:
             avg_velocity /= total
             avg_velocity = avg_velocity.normalize() * self.max_speed
@@ -141,9 +143,10 @@ class Llama(Agent):
         total = 0
         center_mass = pygame.Vector2(0, 0)
         for sheep in sheeps:
-            if self.position.distance_to(sheep.position) < self.perception_radius:
-                center_mass += sheep.position
-                total += 1
+            if sheep.is_alive:
+                if self.position.distance_to(sheep.position) < self.perception_radius:
+                    center_mass += sheep.position
+                    total += 1
         if total > 0:
             center_mass /= total
             desired = center_mass - self.position
@@ -160,12 +163,13 @@ class Llama(Agent):
         total = 0
         steer = pygame.Vector2(0, 0)
         for sheep in sheeps:
-            distance = self.position.distance_to(sheep.position)
-            if 0 < distance < self.perception_radius / 2:
-                diff = self.position - sheep.position
-                diff /= ( distance * 0.5 ) # Weight by distance
-                steer += diff
-                total += 1
+            if sheep.is_alive:
+                distance = self.position.distance_to(sheep.position)
+                if 0 < distance < self.perception_radius / 2:
+                    diff = self.position - sheep.position
+                    diff /= ( distance * 0.5 ) # Weight by distance
+                    steer += diff
+                    total += 1
         if total > 0:
             steer /= total
             if steer.length() > 0:

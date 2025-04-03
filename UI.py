@@ -61,8 +61,8 @@ class ControlScreen:
         # Sheep sliders
         sheep_slider_specs = [
             # (name, lowVal, highVal, presetVal)
-            ("Alignment", 0, 2.0, 0.3),
-            ("Cohesion", 0, 2.0, 0.65),
+            ("Alignment", 0, 2.0, 0.23),
+            ("Cohesion", 0, 2.0, 0.36),
             ("Separation", 0, 3.0, 3.0),
             ("Flee", 0, 3.0, 2.0),
             ("Perception", 0, 200, 55),
@@ -77,9 +77,9 @@ class ControlScreen:
         llama_slider_specs = [
             # (name, lowVal, highVal, presetVal)
             ("Cohesion", 0, 2.0, 0.65),
-            ("Separation", 0, 3.0, 3.0),
-            ("Defend", 0, 4.0, 2.0),
-            ("Perception", 0, 300, 55),
+            ("Separation", 0, 3.0, 0.74),
+            ("Defend", 0, 6.0, 4.0),
+            ("Perception", 0, 300, 250),
         ]
         self.llama_sliders = [
             {"label": label, "slider": Slider(label, WIDTH + 25, start_point + (self.slider_spacing * i), 150, self.slider_height, min_val, max_val, default_val)}

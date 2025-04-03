@@ -1,7 +1,7 @@
 from Agent import Agent
 import pygame
 import random
-
+import time
 
 class Predator(Agent):
     def __init__(self, x, y, size, screen, WIDTH, HEIGHT):
@@ -12,17 +12,27 @@ class Predator(Agent):
         self.max_speed = 3
         self.max_force = 0.05
         self.perception_radius = 100
+        self.alignmentVal = 1.0
+        self.cohesionVal = 0.8
+        self.fleeVal = 2.0
         self.screen = screen
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
         self.size = size
+
+        # Attack variables
         self.max_attack_frequency = 100
         self.ticks_since_last_attack = 100
         self.attack_radius = 25
-        self.alignmentVal = 1.0
-        self.cohesionVal = 0.8
-        self.fleeVal = 2.0
+
+        # Health
         self.health = 5
+        self.is_alive = True
+
+        # For tracking off screen 
+        self.off_screen_time = None
+        self.respawn_delay = 3
+        self.off_screen = False
 
     def update_values(self, values):
         for item in values:
@@ -78,18 +88,42 @@ class Predator(Agent):
         if not self.can_attack():
             return
 
-        buffer = 30 # Distance before turning
-        turn_strength = 0.3 # How sharply they turn
+        buffer = 50 # Buffer off screen allowed
 
-        if self.position.x > self.WIDTH - self.size - buffer:
-            self.apply_force(pygame.Vector2(-turn_strength, 0))
-        elif self.position.x < buffer:
-            self.apply_force(pygame.Vector2(turn_strength, 0))
-            
-        if self.position.y > self.HEIGHT - self.size - buffer:
-            self.apply_force(pygame.Vector2(0, -turn_strength))
-        elif self.position.y < buffer:
-            self.apply_force(pygame.Vector2(0, turn_strength))
+        # Flip directions if it gets too far
+        if (self.position.x < -1 * buffer or self.position.x > self.WIDTH + buffer or
+            self.position.y < -1 * buffer or self.position.y > self.HEIGHT + buffer):
+            self.velocity *= -1
+
+        # Check if predator goes off-screen
+        if (self.position.x < -buffer or self.position.x > self.WIDTH + buffer or 
+            self.position.y < -buffer or self.position.y > self.HEIGHT + buffer):
+            if not self.off_screen:
+                self.off_screen_time = time.time()  # Record the time it went off-screen
+                self.off_screen = True
+        else:
+            self.off_screen = False
+            self.off_screen_time = None
+
+        # Respawn after a delay
+        if self.off_screen and (time.time() - self.off_screen_time > self.respawn_delay):
+            self.respawn()
+
+    def respawn(self):
+        # Respawn the predator at a random location on the screen after being off-screen.
+        side = random.choice(["top", "bottom", "left", "right"])
+        
+        if side == "top":
+            self.position = pygame.Vector2(random.randint(0, self.WIDTH), -self.size)
+        elif side == "bottom":
+            self.position = pygame.Vector2(random.randint(0, self.WIDTH), self.HEIGHT + self.size)
+        elif side == "left":
+            self.position = pygame.Vector2(-self.size, random.randint(0, self.HEIGHT))
+        else:  # "right"
+            self.position = pygame.Vector2(self.WIDTH + self.size, random.randint(0, self.HEIGHT))
+
+        self.velocity = pygame.Vector2(random.uniform(-2, 2), random.uniform(-2, 2))  # Reset velocity
+        self.off_screen = False  # Reset flag
     
     def flock(self, sheeps, llamas):
 
@@ -126,7 +160,7 @@ class Predator(Agent):
         total = 0
         avg_velocity = pygame.Vector2(0, 0)
         for sheep in sheeps:
-            if self.position.distance_to(sheep.position) < self.perception_radius:
+            if sheep.is_alive and self.position.distance_to(sheep.position) < self.perception_radius:
                 avg_velocity += sheep.velocity
                 total += 1
         if total > 0:
@@ -143,7 +177,7 @@ class Predator(Agent):
         total = 0
         center_mass = pygame.Vector2(0, 0)
         for sheep in sheeps:
-            if self.position.distance_to(sheep.position) < self.perception_radius:
+            if sheep.is_alive and self.position.distance_to(sheep.position) < self.perception_radius:
                 center_mass += sheep.position
                 total += 1
         if total > 0:
@@ -162,12 +196,13 @@ class Predator(Agent):
         total = 0
         steer = pygame.Vector2(0, 0)
         for sheep in sheeps:
-            distance = self.position.distance_to(sheep.position)
-            if 0 < distance < self.perception_radius / 2:
-                diff = self.position - sheep.position
-                diff /= distance # Weight by distance
-                steer += diff
-                total += 1
+            if sheep.is_alive:
+                distance = self.position.distance_to(sheep.position)
+                if 0 < distance < self.perception_radius / 2:
+                    diff = self.position - sheep.position
+                    diff /= distance # Weight by distance
+                    steer += diff
+                    total += 1
         if total > 0:
             steer /= total
             if steer.length() > 0:
@@ -182,11 +217,12 @@ class Predator(Agent):
 
     def attack(self, sheeps):
         for sheep in sheeps:
-            distance = self.position.distance_to(sheep.position)
-            if sheep.is_alive and distance < self.attack_radius and self.can_attack():
-                sheep.die()
-                self.ticks_since_last_attack = 0
-                self.health += 1
+            if sheep.is_alive: 
+                distance = self.position.distance_to(sheep.position)
+                if distance < self.attack_radius and self.can_attack():
+                    sheep.die()
+                    self.ticks_since_last_attack = 0
+                    self.health += 1
 
     def check_health(self, llamas):
         for llama in llamas:
@@ -194,7 +230,12 @@ class Predator(Agent):
             if distance < self.attack_radius and self.can_attack():
                 self.ticks_since_last_attack = 0
                 self.health -= 1
+                if self.health <= 0:
+                    self.is_alive = False
     
     def draw(self):
-        self.screen.blit(self.icon, self.position)
+        if self.is_alive:
+            self.screen.blit(self.icon, self.position)
+        else:
+            self.screen.blit(pygame.transform.flip(self.icon, False, True), self.position)
 
