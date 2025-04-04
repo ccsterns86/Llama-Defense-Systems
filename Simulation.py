@@ -27,17 +27,14 @@ background = pygame.transform.scale(background, (UI.WIDTH, UI.HEIGHT))
 # create control screen
 control_screen = UI.ControlScreen()
 font = pygame.font.SysFont(None, 24)
+updated_values, running = control_screen.draw()
 
 # Main loop
 running = True
 while running:
 
     UI.screen.blit(background, (0, 0))
-    updated_values = control_screen.draw()
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+    
 
     # Move and draw agents
     alive_sheep_count = 0
@@ -62,7 +59,6 @@ while running:
             if not preadators_spawned:
                 p.respawn()
                 preadators_spawned = True
-                print("Spawned!")
             p.update_values(updated_values["predator"])
             control_screen.set_display_vals(p.health)
             p.flock(sheep, llamas)
@@ -73,6 +69,7 @@ while running:
             p.draw()
 
     # Display sheep counter
+    updated_values, running = control_screen.draw()
     UI.screen.blit(font.render(f"{alive_sheep_count} remaining sheep", True, UI.WHITE), (UI.WIDTH + 25, UI.HEIGHT - 20))
 
     pygame.display.flip()

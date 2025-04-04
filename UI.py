@@ -57,6 +57,7 @@ class ControlScreen:
         self.slider_spacing = self.slider_height + self.text_height + 10
         self.intra_species_sep = 100
         self.predator_health = 5
+        self.game_running = True
 
         # Sheep sliders
         sheep_slider_specs = [
@@ -137,5 +138,7 @@ class ControlScreen:
                 slider_data["slider"].handle_event(event)
             for slider_data in self.predator_sliders:
                 slider_data["slider"].handle_event(event)
+            if event.type == pygame.QUIT:
+                self.game_running = False
 
-        return {"sheep": sheep_values, "llama": llama_values, "predator": predator_values}
+        return {"sheep": sheep_values, "llama": llama_values, "predator": predator_values}, self.game_running
