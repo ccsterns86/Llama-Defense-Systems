@@ -48,6 +48,8 @@ class Predator(Agent):
 
     def move(self, llamas):
 
+        if not self.is_alive:
+            return
         # update attack counter
         self.ticks_since_last_attack += 1
 

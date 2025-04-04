@@ -66,7 +66,7 @@ while running:
         l.draw()
 
     for p in predators:
-        if pygame.time.get_ticks() > 3000: # Wait 3 seconds for the sheep to flock
+        if pygame.time.get_ticks() > 3000 and p.is_alive: # Wait 3 seconds for the sheep to flock
             if not preadators_spawned:
                 p.respawn()
                 preadators_spawned = True

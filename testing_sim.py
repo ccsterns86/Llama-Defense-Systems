@@ -5,7 +5,7 @@ import numpy as np
 import os
 
 # Parameters to test
-parameters = ['Cohesion', 'Separation', 'Defend', 'Perception']
+parameters = [ 'Perception' ]#['Cohesion', 'Separation', 'Defend', 'Perception']
 values = {
     'Cohesion': [0.0, 2.0], 
     'Separation': [0.0, 3.0], 
@@ -21,7 +21,7 @@ runs_per_param = {
 time = '60' # Run the simulation for 60 seconds
 
 simulation_script = "Simulation.py"  # replace with your actual script
-output_csv = "basic_results.csv"
+output_csv = "perception_results.csv"
 
 # Regular expression to extract "Sheep Left" value
 sheep_regex = re.compile(r"Sheep Left: (\d+)")
