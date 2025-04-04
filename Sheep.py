@@ -12,20 +12,28 @@ class Sheep(Agent):
         self.acceleration = pygame.Vector2(0, 0)
         self.max_speed = 1
         self.max_force = 0.05
-        self.perception_radius = 100
         self.screen = screen
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
         self.size = size
         self.noise_time = random.uniform(0, 1000)
         self.is_alive = True
+        self.alignmentVal = 0.23
+        self.cohesionVal = 0.36
+        self.separationVal = 3.0
+        self.fleeVal = 2.0
+        self.perception_radius = 55
 
     def update_values(self, values):
         for item in values:
-            if item == "max_speed":
-                self.max_speed = values[item]
-            elif item == "max_force":
-                self.max_force = values[item]
+            if item == "alignment":
+                self.alignmentVal = values[item]
+            elif item == "cohesion":
+                self.cohesionVal = values[item]
+            elif item == "separation":
+                self.separationVal = values[item]
+            elif item == "flee":
+                self.fleeVal = values[item]
             elif item == "perception":
                 self.perception_radius = values[item]
 
@@ -41,9 +49,10 @@ class Sheep(Agent):
         closest_predator = float("inf")
 
         for predator in predators:
-            distance = self.position.distance_to(predator.position)
-            if distance < closest_predator:
-                closest_predator = distance
+            if predator.is_alive:
+                distance = self.position.distance_to(predator.position)
+                if distance < closest_predator:
+                    closest_predator = distance
 
         # Modify max speed based on the closest predator
         if closest_predator < danger_zone:
@@ -80,7 +89,7 @@ class Sheep(Agent):
         if not self.is_alive:
             return
 
-        buffer = 30 # Distance before turning
+        buffer = 20 # Distance before turning
         turn_strength = 0.3 # How sharply they turn
 
         if self.position.x > self.WIDTH - self.size - buffer:
@@ -103,20 +112,21 @@ class Sheep(Agent):
         flee = self.flee(predators)
 
         # Apply forces with weights
-        self.apply_force(alignment * 0.8)
-        self.apply_force(cohesion * 1.2)
-        self.apply_force(separation * 1.5)
-        self.apply_force(flee * 2.0)
+        self.apply_force(alignment * self.alignmentVal)
+        self.apply_force(cohesion * self.cohesionVal)
+        self.apply_force(separation * self.separationVal)
+        self.apply_force(flee * self.fleeVal)
 
     def flee(self, predators):
 
         flee_force = pygame.Vector2(0, 0)
         for predator in predators:
-            distance = self.position.distance_to(predator.position)
-            if distance < self.perception_radius * 1.5: # Larger perception radius for predators
-                diff = self.position - predator.position
-                diff = diff.normalize() * self.max_speed # Move in opposite direction
-                flee_force += diff
+            if predator.is_alive:
+                distance = self.position.distance_to(predator.position)
+                if distance < self.perception_radius * 1.5: # Larger perception radius for predators
+                    diff = self.position - predator.position
+                    diff = diff.normalize() * self.max_speed # Move in opposite direction
+                    flee_force += diff
         if flee_force.length() > 0:
             flee_force = flee_force.normalize() * self.max_speed
             flee_force -= self.velocity
@@ -130,7 +140,7 @@ class Sheep(Agent):
         total = 0
         avg_velocity = pygame.Vector2(0, 0)
         for sheep in sheeps:
-            if self.position.distance_to(sheep.position) < self.perception_radius:
+            if sheep.is_alive and self.position.distance_to(sheep.position) < self.perception_radius:
                 avg_velocity += sheep.velocity
                 total += 1
         if total > 0:
@@ -147,7 +157,7 @@ class Sheep(Agent):
         total = 0
         center_mass = pygame.Vector2(0, 0)
         for sheep in sheeps:
-            if self.position.distance_to(sheep.position) < self.perception_radius:
+            if sheep.is_alive and self.position.distance_to(sheep.position) < self.perception_radius:
                 center_mass += sheep.position
                 total += 1
         if total > 0:
@@ -166,12 +176,13 @@ class Sheep(Agent):
         total = 0
         steer = pygame.Vector2(0, 0)
         for sheep in sheeps:
-            distance = self.position.distance_to(sheep.position)
-            if 0 < distance < self.perception_radius / 2:
-                diff = self.position - sheep.position
-                diff /= ( distance * 0.5 ) # Weight by distance
-                steer += diff
-                total += 1
+            if sheep.is_alive:
+                distance = self.position.distance_to(sheep.position)
+                if 0 < distance < self.perception_radius / 2:
+                    diff = self.position - sheep.position
+                    diff /= ( distance * 0.5 ) # Weight by distance
+                    steer += diff
+                    total += 1
         if total > 0:
             steer /= total
             if steer.length() > 0:

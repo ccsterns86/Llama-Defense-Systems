@@ -11,11 +11,12 @@ RED = (255, 0, 0)
 
 # Screen settings
 WIDTH, HEIGHT = 800, 600
-screen = pygame.display.set_mode((WIDTH + 200, HEIGHT))
+screen = pygame.display.set_mode((WIDTH + 400, HEIGHT))
 
 # Sliders for value adjustment
 class Slider:
-    def __init__(self, x, y, width, height, min_val, max_val, current_val):
+    def __init__(self, label, x, y, width, height, min_val, max_val, current_val):
+        self.font = pygame.font.SysFont(None, 18)
         self.rect = pygame.Rect(x, y, width, height)
         self.min_val = min_val
         self.max_val = max_val
@@ -24,58 +25,117 @@ class Slider:
         self.width = width
         self.slider_rect = pygame.Rect(x + (self.value - self.min_val) / (self.max_val - self.min_val) * width - 10, y,
                                        20, height)
+        self.label = label
         self.dragging = False
 
+
     def draw(self, surface):
+        value_text = self.font.render(f"{self.label}: {self.value:.2f}", True, WHITE)
+        screen.blit(value_text, (self.rect.left, self.rect.top - 15))
         # Draw the track
         pygame.draw.rect(surface, GRAY, self.rect)
         # Draw the slider
         pygame.draw.circle(surface, GREEN, (self.slider_rect.x + (self.height/2), self.slider_rect.y + (self.height/2)), self.height/2)
 
     def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.slider_rect.collidepoint(event.pos):
-                self.dragging = True
+        if event.type == pygame.MOUSEBUTTONDOWN and self.slider_rect.collidepoint(event.pos):
+            self.dragging = True
         elif event.type == pygame.MOUSEBUTTONUP:
             self.dragging = False
-        elif event.type == pygame.MOUSEMOTION:
-            if self.dragging:
-                x = max(self.rect.left, min(event.pos[0], self.rect.right))
-                self.slider_rect.x = x - 10  # Adjust the slider position
-                # Update the value based on the slider position
-                self.value = self.min_val + (float(x - self.rect.left)) / self.width * (self.max_val - self.min_val)
+        elif event.type == pygame.MOUSEMOTION and self.dragging:
+            x = max(self.rect.left, min(event.pos[0], self.rect.right))
+            self.slider_rect.x = x - 10  # Adjust the slider position
+            # Update the value based on the slider position
+            self.value = self.min_val + (float(x - self.rect.left)) / self.width * (self.max_val - self.min_val)
 
 # UI Controls
 class ControlScreen:
     def __init__(self):
         self.font = pygame.font.SysFont(None, 24)
-        # Create sliders
-        self.slider1 = Slider(WIDTH + 25, 60, 150.0, 20.0, 0.0, 3.0, 1.0)
-        self.slider2 = Slider(WIDTH + 25, 110, 150.0, 20.0, 0.0, 1.0, 0.05)
-        self.slider3 = Slider(WIDTH + 25, 160, 150.0, 20, 0, 200, 100)
+        self.slider_height = 15
+        self.text_height = 15
+        self.slider_spacing = self.slider_height + self.text_height + 10
+        self.intra_species_sep = 100
+        self.predator_health = 5
 
+        # Sheep sliders
+        sheep_slider_specs = [
+            # (name, lowVal, highVal, presetVal)
+            ("Alignment", 0, 2.0, 0.23),
+            ("Cohesion", 0, 2.0, 0.36),
+            ("Separation", 0, 3.0, 3.0),
+            ("Flee", 0, 3.0, 2.0),
+            ("Perception", 0, 200, 55),
+        ]
+        self.sheep_sliders = [
+            {"label": label, "slider": Slider(label, WIDTH + 25, 60 + (self.slider_spacing * i), 150, self.slider_height, min_val, max_val, default_val)}
+            for i, (label, min_val, max_val, default_val) in enumerate(sheep_slider_specs)
+        ]
+
+        # Llama sliders
+        start_point = (len(sheep_slider_specs)*self.slider_spacing) + self.intra_species_sep + (3 * self.text_height )
+        llama_slider_specs = [
+            # (name, lowVal, highVal, presetVal)
+            ("Cohesion", 0, 2.0, 0.65),
+            ("Separation", 0, 3.0, 0.74),
+            ("Defend", 0, 6.0, 4.0),
+            ("Perception", 0, 300, 250),
+        ]
+        self.llama_sliders = [
+            {"label": label, "slider": Slider(label, WIDTH + 25, start_point + (self.slider_spacing * i), 150, self.slider_height, min_val, max_val, default_val)}
+            for i, (label, min_val, max_val, default_val) in enumerate(llama_slider_specs)
+        ]
+
+        # Predator sliders
+        predator_slider_specs = [
+            # (name, lowVal, highVal, presetVal)
+            ("Cohesion", 0, 2.0, 0.65),
+            ("Flee", 0, 4.0, 2.0),
+            ("Perception", 0, 300, 55),
+            ("Attack Time", 0, 200, 100),
+        ]
+        self.predator_sliders = [
+            {"label": label,
+             "slider": Slider(label, WIDTH + 225, 80 + (self.slider_spacing * i), 150, self.slider_height,
+                              min_val, max_val, default_val)}
+            for i, (label, min_val, max_val, default_val) in enumerate(predator_slider_specs)
+        ]
+    def set_display_vals(self, predator_health):
+        self.predator_health = predator_health
 
     def draw(self):
-        pygame.draw.rect(screen, BLACK, pygame.Rect(WIDTH, 0, WIDTH + 200, HEIGHT))  # right panel
+        pygame.draw.rect(screen, BLACK, pygame.Rect(WIDTH, 0, WIDTH + 400, HEIGHT))  # right panel
         screen.blit(self.font.render("Sheep", True, WHITE), (WIDTH + 25, 10))
-        # Draw sliders
-        self.slider1.draw(screen)
-        value_text1 = self.font.render(f"Max Speed: {self.slider1.value:.2f}", True, WHITE)
-        screen.blit(value_text1, (self.slider1.rect.left, self.slider1.rect.top - 17))
-        self.slider2.draw(screen)
-        value_text2 = self.font.render(f"Max Force: {self.slider2.value:.2f}", True, WHITE)
-        screen.blit(value_text2, (self.slider2.rect.left, self.slider2.rect.top - 17))
-        self.slider3.draw(screen)
-        value_text3 = self.font.render(f"Perception: {int(self.slider3.value)}", True, WHITE)
-        screen.blit(value_text3, (self.slider3.rect.left, self.slider3.rect.top - 17))
 
-        # Return all values to use for updates
+        # Draw sliders
+        sheep_values = {}
+        for slider_data in self.sheep_sliders:
+            label, slider = slider_data["label"], slider_data["slider"]
+            slider.draw(screen)
+            sheep_values[label.lower()] = slider.value  # Store values in dictionary
+
+        screen.blit(self.font.render("Llama", True, WHITE), (WIDTH + 25, (len(self.sheep_sliders)*self.slider_spacing) + self.intra_species_sep))
+        llama_values = {}
+        for slider_data in self.llama_sliders:
+            label, slider = slider_data["label"], slider_data["slider"]
+            slider.draw(screen)
+            llama_values[label.lower()] = slider.value  # Store values in dictionary
+
+        screen.blit(self.font.render("Predator", True, WHITE), (WIDTH + 225, 10))
+        screen.blit(self.font.render(f"Health {self.predator_health}", True, WHITE), (WIDTH + 225, 30))
+        predator_values = {}
+        for slider_data in self.predator_sliders:
+            label, slider = slider_data["label"], slider_data["slider"]
+            slider.draw(screen)
+            predator_values[label.lower()] = slider.value  # Store values in dictionary
+
+        # # Return all values to use for updates
         for event in pygame.event.get():
-            self.slider1.handle_event(event)
-            self.slider2.handle_event(event)
-            self.slider3.handle_event(event)
-        return {"sheep": {
-            "max_speed": self.slider1.value,
-            "max_force": self.slider2.value,
-            "perception": self.slider3.value
-        }}
+            for slider_data in self.sheep_sliders:
+                slider_data["slider"].handle_event(event)
+            for slider_data in self.llama_sliders:
+                slider_data["slider"].handle_event(event)
+            for slider_data in self.predator_sliders:
+                slider_data["slider"].handle_event(event)
+
+        return {"sheep": sheep_values, "llama": llama_values, "predator": predator_values}

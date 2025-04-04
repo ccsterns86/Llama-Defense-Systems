@@ -12,6 +12,7 @@ class Agent:
         self.screen = screen
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
+        self.is_alive = True
 
     def move(self, _):
         self.icon_rect.x += random.choice([-1, 0, 1]) * self.speed
