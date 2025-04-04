@@ -18,6 +18,7 @@ sheep = [
     for _ in range(num_sheep)]
 llamas = [Llama(400, 300, 100, UI.screen, UI.WIDTH, UI.HEIGHT)]
 predators = [Predator(700, 300, 80, UI.screen, UI.WIDTH, UI.HEIGHT)]
+preadators_spawned = False
 
 # background
 background = pygame.image.load("assets/background.jpg")
@@ -57,7 +58,11 @@ while running:
         l.draw()
 
     for p in predators:
-        if p.is_alive:
+        if pygame.time.get_ticks() > 3000: # Wait 3 seconds for the sheep to flock
+            if not preadators_spawned:
+                p.respawn()
+                preadators_spawned = True
+                print("Spawned!")
             p.update_values(updated_values["predator"])
             control_screen.set_display_vals(p.health)
             p.flock(sheep, llamas)

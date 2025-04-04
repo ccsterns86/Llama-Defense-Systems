@@ -90,10 +90,10 @@ class Predator(Agent):
 
         buffer = 50 # Buffer off screen allowed
 
-        # Flip directions if it gets too far
-        if (self.position.x < -1 * buffer or self.position.x > self.WIDTH + buffer or
-            self.position.y < -1 * buffer or self.position.y > self.HEIGHT + buffer):
-            self.velocity *= -1
+        # # Flip directions if it gets too far
+        # if (self.position.x < -1 * buffer or self.position.x > self.WIDTH + buffer or
+        #     self.position.y < -1 * buffer or self.position.y > self.HEIGHT + buffer):
+        #     self.velocity *= -1
 
         # Check if predator goes off-screen
         if (self.position.x < -buffer or self.position.x > self.WIDTH + buffer or 
@@ -122,7 +122,15 @@ class Predator(Agent):
         else:  # "right"
             self.position = pygame.Vector2(self.WIDTH + self.size, random.randint(0, self.HEIGHT))
 
-        self.velocity = pygame.Vector2(random.uniform(-2, 2), random.uniform(-2, 2))  # Reset velocity
+        # Calculate direction towards center of screen
+        center = pygame.Vector2(self.WIDTH / 2, self.HEIGHT / 2)
+        direction_to_center = center - self.position
+        if (direction_to_center.length() > 0):
+            direction_to_center = direction_to_center.normalize() * self.max_speed / 2
+        else:
+            direction_to_center = pygame.Vector2(random.uniform(-2, 2), random.uniform(-2, 2))
+
+        self.velocity = direction_to_center  # Reset velocity
         self.off_screen = False  # Reset flag
     
     def flock(self, sheeps, llamas):
