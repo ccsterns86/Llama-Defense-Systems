@@ -34,8 +34,8 @@ with open(output_csv, mode='w', newline='') as file:
     writer.writerow([f"Parameter", "Value", "Run", "SheepLeft"])
 
     for parameter in parameters:
-      test_values = np.linspace(values[parameter][0], values[parameter][1], 5)
-      num_runs = runs_per_param[parameter]
+      test_values = np.linspace(values[parameter][0], values[parameter][1], runs_per_param[parameter])
+      num_runs = 5
 
       for val in test_values:
           for run in range(1, num_runs + 1):
