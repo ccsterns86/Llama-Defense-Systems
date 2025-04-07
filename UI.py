@@ -50,7 +50,7 @@ class Slider:
 
 # UI Controls
 class ControlScreen:
-    def __init__(self):
+    def __init__(self, args):
         self.font = pygame.font.SysFont(None, 24)
         self.slider_height = 15
         self.text_height = 15
@@ -58,6 +58,8 @@ class ControlScreen:
         self.intra_species_sep = 100
         self.predator_health = 5
         self.game_running = True
+        self.llama_vals = { "lcohesion": args.lcohesion, "lseparation": args.lseparation, 
+            "ldefend": args.ldefend, "lperception": args.lperception }
 
         # Sheep sliders
         sheep_slider_specs = [
@@ -77,10 +79,10 @@ class ControlScreen:
         start_point = (len(sheep_slider_specs)*self.slider_spacing) + self.intra_species_sep + (3 * self.text_height )
         llama_slider_specs = [
             # (name, lowVal, highVal, presetVal)
-            ("Cohesion", 0, 2.0, 0.65),
-            ("Separation", 0, 3.0, 0.74),
-            ("Defend", 0, 6.0, 4.0),
-            ("Perception", 0, 300, 250),
+            ("Cohesion", 0, 2.0, self.llama_vals['lcohesion']),
+            ("Separation", 0, 3.0, self.llama_vals['lseparation']),
+            ("Defend", 0, 6.0, self.llama_vals['ldefend']),
+            ("Perception", 0, 300, self.llama_vals['lperception']),
         ]
         self.llama_sliders = [
             {"label": label, "slider": Slider(label, WIDTH + 25, start_point + (self.slider_spacing * i), 150, self.slider_height, min_val, max_val, default_val)}
