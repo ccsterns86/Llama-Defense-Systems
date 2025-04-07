@@ -73,12 +73,12 @@ while running:
                     p.respawn()
                     p.is_spawned = True
                 p.update_values(updated_values["predator"])
-                control_screen.set_display_vals(i, p.health)
                 p.flock(sheep, llamas, predators)
                 p.move(llamas)
                 p.attack(sheep)
                 p.check_health(llamas)
                 p.edges()
+            control_screen.set_display_vals(i, p.health)
             p.draw()
 
     # Display sheep counter
