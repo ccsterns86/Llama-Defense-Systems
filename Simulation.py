@@ -25,10 +25,11 @@ clock = pygame.time.Clock()
 
 # Create agents
 num_sheep = 100
+num_llamas = 3
 sheep = [
     Sheep(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 50, UI.screen, UI.WIDTH, UI.HEIGHT)
     for _ in range(num_sheep)]
-llamas = [Llama(400, 300, 100, UI.screen, UI.WIDTH, UI.HEIGHT)]
+llamas = [Llama(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 100, UI.screen, UI.WIDTH, UI.HEIGHT) for _ in range(num_llamas)]
 predators = [Predator(700, 300, 80, UI.screen, UI.WIDTH, UI.HEIGHT)]
 preadators_spawned = False
 
