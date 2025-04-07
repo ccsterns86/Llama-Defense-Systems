@@ -237,7 +237,7 @@ class Predator(Agent):
     def check_health(self, llamas):
         for llama in llamas:
             distance = self.position.distance_to(llama.position)
-            if distance < self.attack_radius and self.can_attack():
+            if distance < 1.5 * self.attack_radius and self.can_attack():
                 self.ticks_since_last_attack = 0
                 self.health -= 1
                 if self.health <= 0:

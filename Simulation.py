@@ -25,7 +25,7 @@ clock = pygame.time.Clock()
 
 # Create agents
 num_sheep = 100
-num_llamas = 3
+num_llamas = 5
 sheep = [
     Sheep(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 50, UI.screen, UI.WIDTH, UI.HEIGHT)
     for _ in range(num_sheep)]
@@ -61,23 +61,24 @@ while running:
 
     for l in llamas:
         l.update_values(updated_values["llama"])
-        l.flock(sheep, predators)
+        l.flock(sheep, llamas, predators)
         l.move(predators)
         l.edges()
         l.draw()
 
     for p in predators:
-        if pygame.time.get_ticks() > 3000 and p.is_alive: # Wait 3 seconds for the sheep to flock
-            if not preadators_spawned:
-                p.respawn()
-                preadators_spawned = True
-            p.update_values(updated_values["predator"])
-            control_screen.set_display_vals(p.health)
-            p.flock(sheep, llamas)
-            p.move(llamas)
-            p.attack(sheep)
-            p.check_health(llamas)
-            p.edges()
+        if pygame.time.get_ticks() > 3000: # Wait 3 seconds for the sheep to flock
+            if p.is_alive:
+                if not preadators_spawned:
+                    p.respawn()
+                    preadators_spawned = True
+                p.update_values(updated_values["predator"])
+                control_screen.set_display_vals(p.health)
+                p.flock(sheep, llamas)
+                p.move(llamas)
+                p.attack(sheep)
+                p.check_health(llamas)
+                p.edges()
             p.draw()
 
     # Display sheep counter

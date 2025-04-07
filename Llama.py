@@ -92,10 +92,10 @@ class Llama(Agent):
         elif self.position.y < buffer:
             self.apply_force(pygame.Vector2(0, turn_strength))
     
-    def flock(self, sheeps, predators):
-        alignment = self.align(sheeps)
-        cohesion = self.cohere(sheeps)
-        separation = self.separate(sheeps)
+    def flock(self, sheeps, llamas, predators):
+        alignment = self.align(sheeps, llamas)
+        cohesion = self.cohere(sheeps, llamas)
+        separation = self.separate(sheeps, llamas)
         defend = self.defend(predators)
 
         # Apply forces with weights
@@ -120,7 +120,7 @@ class Llama(Agent):
                 defend_force = defend_force.normalize() * self.max_force
         return defend_force
     
-    def align(self, sheeps):
+    def align(self, sheeps, llamas):
         # Steer towards average heading of neighbors
         total = 0
         avg_velocity = pygame.Vector2(0, 0)
@@ -128,6 +128,11 @@ class Llama(Agent):
             if sheep.is_alive:
                 if self.position.distance_to(sheep.position) < self.perception_radius:
                     avg_velocity += sheep.velocity
+                    total += 1
+        for llama in llamas:
+            if llama != self:
+                if self.position.distance_to(llama.position) < self.perception_radius:
+                    avg_velocity += llama.velocity
                     total += 1
         if total > 0:
             avg_velocity /= total
@@ -138,7 +143,7 @@ class Llama(Agent):
             return steer
         return pygame.Vector2(0, 0)
         
-    def cohere(self, sheeps):
+    def cohere(self, sheeps, llamas):
         # Steer towards the center of mass of neighbors
         total = 0
         center_mass = pygame.Vector2(0, 0)
@@ -147,6 +152,13 @@ class Llama(Agent):
                 if self.position.distance_to(sheep.position) < self.perception_radius:
                     center_mass += sheep.position
                     total += 1
+
+        for llama in llamas:
+            if llama != self:
+                if self.position.distance_to(llama.position) < self.perception_radius:
+                    center_mass += llama.position
+                    total += 1
+
         if total > 0:
             center_mass /= total
             desired = center_mass - self.position
@@ -158,7 +170,7 @@ class Llama(Agent):
                 return steer
         return pygame.Vector2(0, 0)
     
-    def separate(self, sheeps):
+    def separate(self, sheeps, llamas):
         # Move away from close neighbors
         total = 0
         steer = pygame.Vector2(0, 0)
@@ -170,6 +182,16 @@ class Llama(Agent):
                     diff /= ( distance * 0.5 ) # Weight by distance
                     steer += diff
                     total += 1
+
+        for llama in llamas:
+            if llama != self:
+                distance = self.position.distance_to(llama.position)
+                if 0 < distance < self.perception_radius / 2:
+                    diff = self.position - llama.position
+                    diff /= (distance * 0.5)  # Weight by distance
+                    steer += diff
+                    total += 1
+
         if total > 0:
             steer /= total
             if steer.length() > 0:
