@@ -25,8 +25,8 @@ clock = pygame.time.Clock()
 
 # Create agents
 num_sheep = 100
-num_llamas = 1
-num_predators = 3
+num_llamas = 3
+num_predators = 5
 sheep = [
     Sheep(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 50, UI.screen, UI.WIDTH, UI.HEIGHT)
     for _ in range(num_sheep)]
@@ -74,7 +74,7 @@ while running:
                     p.is_spawned = True
                 p.update_values(updated_values["predator"])
                 control_screen.set_display_vals(i, p.health)
-                p.flock(sheep, llamas)
+                p.flock(sheep, llamas, predators)
                 p.move(llamas)
                 p.attack(sheep)
                 p.check_health(llamas)

@@ -95,7 +95,9 @@ class ControlScreen:
             ("Cohesion", 0, 2.0, 0.65),
             ("Flee", 0, 4.0, 2.0),
             ("Perception", 0, 300, 55),
+            ("Separation", 0, 3, 1),
             ("Attack Time", 0, 200, 100),
+            ("Pack Strength", 0, 10, 0),
         ]
         self.predator_sliders = [
             {"label": label,
@@ -132,7 +134,7 @@ class ControlScreen:
             predator_values[label.lower()] = slider.value  # Store values in dictionary
 
         for i, health in zip(self.predators_health.keys(), self.predators_health.values()):
-            screen.blit(self.font.render(f"#{i} Health {health}", True, WHITE), (WIDTH + 225, 210 + (20 * i)))
+            screen.blit(self.font.render(f"#{i} Health {health}", True, WHITE), (WIDTH + 225, 280 + (20 * i)))
 
         # # Return all values to use for updates
         for event in pygame.event.get():

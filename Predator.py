@@ -14,11 +14,13 @@ class Predator(Agent):
         self.perception_radius = 100
         self.alignmentVal = 1.0
         self.cohesionVal = 0.8
+        self.separationVal = 1.0
         self.fleeVal = 2.0
         self.screen = screen
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
         self.size = size
+        self.pack_strength = 0
 
         # Attack variables
         self.max_attack_frequency = 100
@@ -39,12 +41,16 @@ class Predator(Agent):
         for item in values:
             if item == "cohesion":
                 self.cohesionVal = values[item]
+            elif item == "separation":
+                self.separationVal = values[item]
             elif item == "flee":
                 self.fleeVal = values[item]
             elif item == "perception":
                 self.perception_radius = values[item]
             elif item == "attack time":
                 self.max_attack_frequency = values[item]
+            elif item == "pack strength":
+                self.pack_strength = values[item]
 
 
     def move(self, llamas):
@@ -113,6 +119,7 @@ class Predator(Agent):
             self.respawn()
 
     def respawn(self):
+
         # Respawn the predator at a random location on the screen after being off-screen.
         side = random.choice(["top", "bottom", "left", "right"])
         
@@ -136,19 +143,21 @@ class Predator(Agent):
         self.velocity = direction_to_center  # Reset velocity
         self.off_screen = False  # Reset flag
     
-    def flock(self, sheeps, llamas):
+    def flock(self, sheeps, llamas, predators):
 
         if not self.can_attack():
             return
 
-        alignment = self.align(sheeps)
-        cohesion = self.cohere(sheeps)
+        alignment = self.align(sheeps, predators)
+        cohesion = self.cohere(sheeps, predators)
+        separation = self.separate(predators)
         flee = self.flee(llamas)
 
         # Apply forces with weights
         # Apply forces with weights
         self.apply_force(alignment * self.alignmentVal)
         self.apply_force(cohesion * self.cohesionVal)
+        self.apply_force(separation * self.separationVal)
         self.apply_force(flee * self.fleeVal)
 
     def flee(self, llamas):
@@ -166,14 +175,23 @@ class Predator(Agent):
                 flee_force = flee_force.normalize() * self.max_force
         return flee_force
 
-    def align(self, sheeps):
+    def align(self, sheeps, predators):
         # Steer towards average heading of neighbors
         total = 0
         avg_velocity = pygame.Vector2(0, 0)
         for sheep in sheeps:
             if sheep.is_alive and self.position.distance_to(sheep.position) < self.perception_radius:
-                avg_velocity += sheep.velocity
+                if self.pack_strength > 0:
+                    avg_velocity += sheep.velocity * (1/self.pack_strength)
+                else:
+                    avg_velocity += sheep.velocity
                 total += 1
+
+        for predator in predators:
+            if self.pack_strength > 0 and predator != self and predator.is_alive and self.position.distance_to(predator.position) < self.perception_radius:
+                avg_velocity += predator.velocity * self.pack_strength
+                total += 1
+
         if total > 0:
             avg_velocity /= total
             avg_velocity = avg_velocity.normalize() * self.max_speed
@@ -183,14 +201,23 @@ class Predator(Agent):
             return steer
         return pygame.Vector2(0, 0)
         
-    def cohere(self, sheeps):
+    def cohere(self, sheeps, predators):
         # Steer towards the center of mass of neighbors
         total = 0
         center_mass = pygame.Vector2(0, 0)
         for sheep in sheeps:
             if sheep.is_alive and self.position.distance_to(sheep.position) < self.perception_radius:
-                center_mass += sheep.position
+                if self.pack_strength >0:
+                    center_mass += sheep.position * (1/self.pack_strength)
+                else:
+                    center_mass += sheep.position
                 total += 1
+
+        for predator in predators:
+            if self.pack_strength > 0 and predator != self and predator.is_alive and self.position.distance_to(predator.position) < self.perception_radius:
+                center_mass += predator.position * self.pack_strength
+                total += 1
+
         if total > 0:
             center_mass /= total
             desired = center_mass - self.position
@@ -202,17 +229,17 @@ class Predator(Agent):
                 return steer
         return pygame.Vector2(0, 0)
     
-    def separate(self, sheeps):
+    def separate(self, predators):
         # Move away from close neighbors
         total = 0
         steer = pygame.Vector2(0, 0)
-        for sheep in sheeps:
-            if sheep.is_alive:
-                distance = self.position.distance_to(sheep.position)
+        for predator in predators:
+            if self.pack_strength > 0 and predator != self and predator.is_alive:
+                distance = self.position.distance_to(predator.position)
                 if 0 < distance < self.perception_radius / 2:
-                    diff = self.position - sheep.position
+                    diff = self.position - predator.position
                     diff /= distance # Weight by distance
-                    steer += diff
+                    steer += diff * self.pack_strength
                     total += 1
         if total > 0:
             steer /= total
