@@ -28,6 +28,7 @@ class Predator(Agent):
         # Health
         self.health = 5
         self.is_alive = True
+        self.is_spawned = False
 
         # For tracking off screen 
         self.off_screen_time = None
