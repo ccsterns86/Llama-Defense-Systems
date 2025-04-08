@@ -11,10 +11,11 @@ from Predator import Predator
 parser = ArgumentParser(prog="Llama Defense System")
 parser.add_argument('--lcohesion', help='sets the cohesion value for the llama(s)', default=0.65, type=float)
 parser.add_argument('--lseparation', help='sets the separation value for the llama(s)', default=0.74, type=float)
-parser.add_argument('--ldefend', help='sets the defend value for the llama(s)', default=4.0, type=float)
+parser.add_argument('--ldefend', help='sets the defend value for the llama(s)', default=6.0, type=float)
 parser.add_argument('--lperception', help='sets the perception value for the llama(s)', default=250.0, type=float)
 parser.add_argument('--lnum', help='sets the number of llamas in the simulation', default=1, type=int)
 parser.add_argument('--time', help='time the simulation should run in seconds', type=int)
+parser.add_argument('--lpred', help='the number of predators', default=1, type=int)
 
 args = parser.parse_args()
 
@@ -25,12 +26,13 @@ clock = pygame.time.Clock()
 
 # Create agents
 num_sheep = 100
+num_llamas = args.lnum
+num_predators = args.lpred
 sheep = [
     Sheep(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 50, UI.screen, UI.WIDTH, UI.HEIGHT)
     for _ in range(num_sheep)]
-llamas = [Llama(400, 300, 100, UI.screen, UI.WIDTH, UI.HEIGHT)]
-predators = [Predator(700, 300, 80, UI.screen, UI.WIDTH, UI.HEIGHT)]
-preadators_spawned = False
+llamas = [Llama(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 100, UI.screen, UI.WIDTH, UI.HEIGHT) for _ in range(num_llamas)]
+predators = [Predator(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 80, UI.screen, UI.WIDTH, UI.HEIGHT) for _ in range(num_predators)]
 
 # background
 background = pygame.image.load("assets/background.jpg")
@@ -60,23 +62,24 @@ while running:
 
     for l in llamas:
         l.update_values(updated_values["llama"])
-        l.flock(sheep, predators)
+        l.flock(sheep, llamas, predators)
         l.move(predators)
         l.edges()
         l.draw()
 
-    for p in predators:
-        if pygame.time.get_ticks() > 3000 and p.is_alive: # Wait 3 seconds for the sheep to flock
-            if not preadators_spawned:
-                p.respawn()
-                preadators_spawned = True
-            p.update_values(updated_values["predator"])
-            control_screen.set_display_vals(p.health)
-            p.flock(sheep, llamas)
-            p.move(llamas)
-            p.attack(sheep)
-            p.check_health(llamas)
-            p.edges()
+    for i, p in enumerate(predators):
+        if pygame.time.get_ticks() > 3000: # Wait 3 seconds for the sheep to flock
+            if p.is_alive:
+                if not p.is_spawned:
+                    p.respawn()
+                    p.is_spawned = True
+                p.update_values(updated_values["predator"])
+                p.flock(sheep, llamas, predators)
+                p.move(llamas)
+                p.attack(sheep)
+                p.check_health(llamas)
+                p.edges()
+            control_screen.set_display_vals(i, p.health)
             p.draw()
 
     # Display sheep counter

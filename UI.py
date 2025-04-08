@@ -56,7 +56,7 @@ class ControlScreen:
         self.text_height = 15
         self.slider_spacing = self.slider_height + self.text_height + 10
         self.intra_species_sep = 100
-        self.predator_health = 5
+        self.predators_health = {}
         self.game_running = True
         self.llama_vals = { "lcohesion": args.lcohesion, "lseparation": args.lseparation, 
             "ldefend": args.ldefend, "lperception": args.lperception }
@@ -65,7 +65,7 @@ class ControlScreen:
         sheep_slider_specs = [
             # (name, lowVal, highVal, presetVal)
             ("Alignment", 0, 2.0, 0.23),
-            ("Cohesion", 0, 2.0, 0.36),
+            ("Cohesion", 0, 2.0, 0.72),
             ("Separation", 0, 3.0, 3.0),
             ("Flee", 0, 3.0, 2.0),
             ("Perception", 0, 200, 55),
@@ -95,16 +95,18 @@ class ControlScreen:
             ("Cohesion", 0, 2.0, 0.65),
             ("Flee", 0, 4.0, 2.0),
             ("Perception", 0, 300, 55),
+            ("Separation", 0, 3, 1),
             ("Attack Time", 0, 200, 100),
+            ("Pack Strength", 0, 10, 0),
         ]
         self.predator_sliders = [
             {"label": label,
-             "slider": Slider(label, WIDTH + 225, 80 + (self.slider_spacing * i), 150, self.slider_height,
+             "slider": Slider(label, WIDTH + 225, 60 + (self.slider_spacing * i), 150, self.slider_height,
                               min_val, max_val, default_val)}
             for i, (label, min_val, max_val, default_val) in enumerate(predator_slider_specs)
         ]
-    def set_display_vals(self, predator_health):
-        self.predator_health = predator_health
+    def set_display_vals(self, val_id, predator_health):
+        self.predators_health[val_id] = predator_health
 
     def draw(self):
         pygame.draw.rect(screen, BLACK, pygame.Rect(WIDTH, 0, WIDTH + 400, HEIGHT))  # right panel
@@ -125,12 +127,14 @@ class ControlScreen:
             llama_values[label.lower()] = slider.value  # Store values in dictionary
 
         screen.blit(self.font.render("Predator", True, WHITE), (WIDTH + 225, 10))
-        screen.blit(self.font.render(f"Health {self.predator_health}", True, WHITE), (WIDTH + 225, 30))
         predator_values = {}
         for slider_data in self.predator_sliders:
             label, slider = slider_data["label"], slider_data["slider"]
             slider.draw(screen)
             predator_values[label.lower()] = slider.value  # Store values in dictionary
+
+        for i, health in zip(self.predators_health.keys(), self.predators_health.values()):
+            screen.blit(self.font.render(f"#{i} Health {health}", True, WHITE), (WIDTH + 225, 280 + (20 * i)))
 
         # # Return all values to use for updates
         for event in pygame.event.get():
