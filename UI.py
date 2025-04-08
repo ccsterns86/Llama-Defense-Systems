@@ -65,7 +65,7 @@ class ControlScreen:
         sheep_slider_specs = [
             # (name, lowVal, highVal, presetVal)
             ("Alignment", 0, 2.0, 0.23),
-            ("Cohesion", 0, 2.0, 0.36),
+            ("Cohesion", 0, 2.0, 0.72),
             ("Separation", 0, 3.0, 3.0),
             ("Flee", 0, 3.0, 2.0),
             ("Perception", 0, 200, 55),

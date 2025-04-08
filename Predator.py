@@ -12,7 +12,7 @@ class Predator(Agent):
         self.max_speed = 3
         self.max_force = 0.05
         self.perception_radius = 100
-        self.alignmentVal = 1.0
+        self.alignmentVal = 0.2
         self.cohesionVal = 0.8
         self.separationVal = 1.0
         self.fleeVal = 2.0

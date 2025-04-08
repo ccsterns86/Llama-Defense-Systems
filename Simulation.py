@@ -11,10 +11,11 @@ from Predator import Predator
 parser = ArgumentParser(prog="Llama Defense System")
 parser.add_argument('--lcohesion', help='sets the cohesion value for the llama(s)', default=0.65, type=float)
 parser.add_argument('--lseparation', help='sets the separation value for the llama(s)', default=0.74, type=float)
-parser.add_argument('--ldefend', help='sets the defend value for the llama(s)', default=4.0, type=float)
+parser.add_argument('--ldefend', help='sets the defend value for the llama(s)', default=6.0, type=float)
 parser.add_argument('--lperception', help='sets the perception value for the llama(s)', default=250.0, type=float)
 parser.add_argument('--lnum', help='sets the number of llamas in the simulation', default=1, type=int)
 parser.add_argument('--time', help='time the simulation should run in seconds', type=int)
+parser.add_argument('--lpred', help='the number of predators', default=1, type=int)
 
 args = parser.parse_args()
 
@@ -25,8 +26,8 @@ clock = pygame.time.Clock()
 
 # Create agents
 num_sheep = 100
-num_llamas = 3
-num_predators = 5
+num_llamas = args.lnum
+num_predators = args.lpred
 sheep = [
     Sheep(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 50, UI.screen, UI.WIDTH, UI.HEIGHT)
     for _ in range(num_sheep)]
