@@ -15,7 +15,7 @@ screen = pygame.display.set_mode((WIDTH + 400, HEIGHT))
 
 # Sliders for value adjustment
 class Slider:
-    def __init__(self, label, x, y, width, height, min_val, max_val, current_val):
+    def __init__(self, label, x, y, width, height, min_val, max_val, current_val, round_to_int=False):
         self.font = pygame.font.SysFont(None, 18)
         self.rect = pygame.Rect(x, y, width, height)
         self.min_val = min_val
@@ -27,7 +27,7 @@ class Slider:
                                        20, height)
         self.label = label
         self.dragging = False
-
+        self.round_to_int = round_to_int
 
     def draw(self, surface):
         value_text = self.font.render(f"{self.label}: {self.value:.2f}", True, WHITE)
@@ -47,6 +47,19 @@ class Slider:
             self.slider_rect.x = x - 10  # Adjust the slider position
             # Update the value based on the slider position
             self.value = self.min_val + (float(x - self.rect.left)) / self.width * (self.max_val - self.min_val)
+            if self.round_to_int:
+                self.value = round(self.value)
+                self.set_value(self.value)
+    
+    def set_value(self, new_value):
+        if self.round_to_int:
+            self.value = round(new_value)
+        else:
+            self.value = new_value
+
+        # Update slider
+        relative_pos = (self.value - self.min_val) / (self.max_val - self.min_val)
+        self.slider_rect.x = self.rect.left + relative_pos * self.width - 10
 
 # UI Controls
 class ControlScreen:
@@ -105,12 +118,27 @@ class ControlScreen:
                               min_val, max_val, default_val)}
             for i, (label, min_val, max_val, default_val) in enumerate(predator_slider_specs)
         ]
+
+        # Number of agents sliders
+        self.agent_start_point = (len(predator_slider_specs)*self.slider_spacing) + self.intra_species_sep + (3 * self.text_height )
+        agent_slider_specs = [
+            ("Sheep", 0, 200, 100),
+            ("Llamas", 0, 5, 1),
+            ("Predators", 0, 5, 1),
+        ]
+        self.agent_sliders = [
+            {"label": label,
+             "slider": Slider(label, WIDTH + 225, 60 + self.agent_start_point + (self.slider_spacing * i), 150, self.slider_height,
+                              min_val, max_val, default_val, round_to_int=True)}
+            for i, (label, min_val, max_val, default_val) in enumerate(agent_slider_specs)
+        ]
     def set_display_vals(self, val_id, predator_health):
         self.predators_health[val_id] = predator_health
 
     def draw(self):
         pygame.draw.rect(screen, BLACK, pygame.Rect(WIDTH, 0, WIDTH + 400, HEIGHT))  # right panel
         screen.blit(self.font.render("Sheep", True, WHITE), (WIDTH + 25, 10))
+        reset = False
 
         # Draw sliders
         sheep_values = {}
@@ -136,7 +164,20 @@ class ControlScreen:
         for i, health in zip(self.predators_health.keys(), self.predators_health.values()):
             screen.blit(self.font.render(f"#{i} Health {health}", True, WHITE), (WIDTH + 225, 280 + (20 * i)))
 
-        # # Return all values to use for updates
+        screen.blit(self.font.render("Agents", True, WHITE), (WIDTH + 225, self.agent_start_point))
+        agent_values = {}
+        for slider_data in self.agent_sliders:
+            label, slider = slider_data["label"], slider_data["slider"]
+            slider.draw(screen)
+            agent_values[label.lower()] = int(slider.value)
+            
+        # Reset button
+        reset_button = pygame.Rect(WIDTH + 225, HEIGHT - self.text_height - 30, 100, self.text_height + 20)
+        pygame.draw.rect(screen, (197, 225, 165), reset_button)
+        reset_text = self.font.render("Reset", True, (0, 0, 0))
+        screen.blit(reset_text, (reset_button.x + 10, reset_button.y + 10))
+
+        # Return all values to use for updates
         for event in pygame.event.get():
             for slider_data in self.sheep_sliders:
                 slider_data["slider"].handle_event(event)
@@ -144,7 +185,17 @@ class ControlScreen:
                 slider_data["slider"].handle_event(event)
             for slider_data in self.predator_sliders:
                 slider_data["slider"].handle_event(event)
+            for slider_data in self.agent_sliders:
+                slider_data["slider"].handle_event(event)
             if event.type == pygame.QUIT:
                 self.game_running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if reset_button.collidepoint(event.pos):
+                    # Reset the simulation
+                    agent_values = {'sheep': 100, 'llamas': 1, 'predators': 1}
+                    self.agent_sliders[0]['slider'].set_value(100)
+                    self.agent_sliders[1]['slider'].set_value(1)
+                    self.agent_sliders[2]['slider'].set_value(1)
+                    reset = True
 
-        return {"sheep": sheep_values, "llama": llama_values, "predator": predator_values}, self.game_running
+        return {"sheep": sheep_values, "llama": llama_values, "predator": predator_values, "agents": agent_values}, self.game_running, reset

@@ -24,15 +24,6 @@ pygame.init()
 
 clock = pygame.time.Clock()
 
-# Create agents
-num_sheep = 100
-num_llamas = args.lnum
-num_predators = args.lpred
-sheep = [
-    Sheep(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 50, UI.screen, UI.WIDTH, UI.HEIGHT)
-    for _ in range(num_sheep)]
-llamas = [Llama(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 100, UI.screen, UI.WIDTH, UI.HEIGHT) for _ in range(num_llamas)]
-predators = [Predator(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 80, UI.screen, UI.WIDTH, UI.HEIGHT) for _ in range(num_predators)]
 
 # background
 background = pygame.image.load("assets/background.jpg")
@@ -41,13 +32,48 @@ background = pygame.transform.scale(background, (UI.WIDTH, UI.HEIGHT))
 # create control screen
 control_screen = UI.ControlScreen(args)
 font = pygame.font.SysFont(None, 24)
-updated_values, running = control_screen.draw()
+updated_values, running, reset = control_screen.draw()
+
+# Create agents
+num_sheep = updated_values['agents']['sheep']
+num_llamas = updated_values['agents']['llamas'] # args.lnum
+num_predators = updated_values['agents']['predators'] #args.lpred
+sheep = [
+    Sheep(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 50, UI.screen, UI.WIDTH, UI.HEIGHT)
+    for _ in range(num_sheep)]
+llamas = [Llama(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 100, UI.screen, UI.WIDTH, UI.HEIGHT) for _ in range(num_llamas)]
+predators = [Predator(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 80, UI.screen, UI.WIDTH, UI.HEIGHT) for _ in range(num_predators)]
 
 # Main loop
 running = True
 while running:
 
     UI.screen.blit(background, (0, 0))
+
+    # Change number of agents 
+    # Sheep
+    desired_sheep = updated_values["agents"]["sheep"]
+    if len(sheep) < desired_sheep:
+        for _ in range(desired_sheep - len(sheep)):
+            sheep.append(Sheep(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 50, UI.screen, UI.WIDTH, UI.HEIGHT))
+    elif len(sheep) > desired_sheep:
+        sheep = sheep[:desired_sheep]
+
+    # Llamas
+    desired_llamas = updated_values["agents"]["llamas"]
+    if len(llamas) < desired_llamas:
+        for _ in range(desired_llamas - len(llamas)):
+            llamas.append(Llama(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 100, UI.screen, UI.WIDTH, UI.HEIGHT))
+    elif len(llamas) > desired_llamas:
+        llamas = llamas[:desired_llamas]
+
+    # Predators
+    desired_predators = updated_values["agents"]["predators"]
+    if len(predators) < desired_predators:
+        for _ in range(desired_predators - len(predators)):
+            predators.append(Predator(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 80, UI.screen, UI.WIDTH, UI.HEIGHT))
+    elif len(predators) > desired_predators:
+        predators = predators[:desired_predators]
     
     # Move and draw agents
     alive_sheep_count = 0
@@ -83,7 +109,7 @@ while running:
             p.draw()
 
     # Display sheep counter
-    updated_values, running = control_screen.draw()
+    updated_values, running, reset = control_screen.draw()
     UI.screen.blit(font.render(f"{alive_sheep_count} remaining sheep", True, UI.WHITE), (UI.WIDTH + 25, UI.HEIGHT - 20))
 
     pygame.display.flip()
@@ -93,5 +119,11 @@ while running:
     if args.time and pygame.time.get_ticks() > (args.time * 1000):
         running = False
         print(f"Sheep Left: {alive_sheep_count}")
+
+    # Check if we want to reset:
+    if reset:
+        sheep = []
+        llamas = []
+        predators = []
 
 pygame.quit()
