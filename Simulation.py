@@ -36,8 +36,8 @@ updated_values, running, reset = control_screen.draw()
 
 # Create agents
 num_sheep = updated_values['agents']['sheep']
-num_llamas = updated_values['agents']['llamas'] # args.lnum
-num_predators = updated_values['agents']['predators'] #args.lpred
+num_llamas = args.lnum
+num_predators = args.lpred
 sheep = [
     Sheep(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 50, UI.screen, UI.WIDTH, UI.HEIGHT)
     for _ in range(num_sheep)]
@@ -93,9 +93,11 @@ while running:
         l.edges()
         l.draw()
 
-    for i, p in enumerate(predators):
-        if pygame.time.get_ticks() > 3000: # Wait 3 seconds for the sheep to flock
+    predators_alive = False
+    if pygame.time.get_ticks() > 3000: # Wait 3 seconds for the sheep to flock
+        for i, p in enumerate(predators):
             if p.is_alive:
+                predators_alive = True
                 if not p.is_spawned:
                     p.respawn()
                     p.is_spawned = True
@@ -107,6 +109,7 @@ while running:
                 p.edges()
             control_screen.set_display_vals(i, p.health)
             p.draw()
+    else: predators_alive=True
 
     # Display sheep counter
     updated_values, running, reset = control_screen.draw()
@@ -116,7 +119,7 @@ while running:
     clock.tick(30)  # 30 FPS
 
     # Check timing on the simulation
-    if args.time and pygame.time.get_ticks() > (args.time * 1000):
+    if (args.time and pygame.time.get_ticks() > (args.time * 1000)) or not predators_alive:
         running = False
         print(f"Sheep Left: {alive_sheep_count}")
 

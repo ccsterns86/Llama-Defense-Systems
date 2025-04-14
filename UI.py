@@ -123,8 +123,8 @@ class ControlScreen:
         self.agent_start_point = (len(predator_slider_specs)*self.slider_spacing) + self.intra_species_sep + (3 * self.text_height )
         agent_slider_specs = [
             ("Sheep", 0, 200, 100),
-            ("Llamas", 0, 5, 1),
-            ("Predators", 0, 5, 1),
+            ("Llamas", 0, 5, args.lnum),
+            ("Predators", 0, 5, args.lpred),
         ]
         self.agent_sliders = [
             {"label": label,
