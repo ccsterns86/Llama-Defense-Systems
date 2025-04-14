@@ -69,6 +69,6 @@ with open(output_csv, mode='w', newline='') as file:
                 match = sheep_regex.search(result.stdout)
                 if match:
                     sheep_left = int(match.group(1))
-                    writer.writerow([parameter, val, pred, num, run, sheep_left])
+                    writer.writerow([parameter, val, num, pred, run, sheep_left])
                 else:
                     print("Could not extract Sheep Left from output!")

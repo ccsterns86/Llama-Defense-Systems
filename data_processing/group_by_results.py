@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Read your original spreadsheet
-df = pd.read_csv('results.csv')  # Replace with your file name
+df = pd.read_csv('results_perception.csv')  # Replace with your file name
 
 # Group by the columns you want and take the mean of "Num Sheep Alive"
 grouped = df.groupby(['Parameter', 'Value', 'Num llamas', 'Num Predators'])['Num Sheep Alive'].mean().reset_index()
@@ -10,4 +10,4 @@ grouped = df.groupby(['Parameter', 'Value', 'Num llamas', 'Num Predators'])['Num
 grouped = grouped.rename(columns={'Num Sheep Alive': 'Average Sheep Alive'})
 
 # Save to a new CSV
-grouped.to_csv('averaged_results.csv', index=False)
+grouped.to_csv('averaged_results_p.csv', index=False)
