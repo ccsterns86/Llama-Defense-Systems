@@ -119,7 +119,7 @@ while running:
     clock.tick(30)  # 30 FPS
 
     # Check timing on the simulation
-    if (args.time and pygame.time.get_ticks() > (args.time * 1000)) or not predators_alive:
+    if (args.time and pygame.time.get_ticks() > (args.time * 1000)) or (args.time and not predators_alive):
         running = False
         print(f"Sheep Left: {alive_sheep_count}")
 
