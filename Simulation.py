@@ -9,10 +9,10 @@ from Predator import Predator
 
 # Get the passed in values
 parser = ArgumentParser(prog="Llama Defense System")
-parser.add_argument('--lcohesion', help='sets the cohesion value for the llama(s)', default=0.65, type=float)
-parser.add_argument('--lseparation', help='sets the separation value for the llama(s)', default=0.74, type=float)
-parser.add_argument('--ldefend', help='sets the defend value for the llama(s)', default=6.0, type=float)
-parser.add_argument('--lperception', help='sets the perception value for the llama(s)', default=250.0, type=float)
+parser.add_argument('--lcohesion', help='sets the cohesion value for the llama(s)', default=0.9, type=float)
+parser.add_argument('--lseparation', help='sets the separation value for the llama(s)', default=0.2, type=float)
+parser.add_argument('--ldefend', help='sets the defend value for the llama(s)', default=5.0, type=float)
+parser.add_argument('--lperception', help='sets the perception value for the llama(s)', default=225.0, type=float)
 parser.add_argument('--lnum', help='sets the number of llamas in the simulation', default=1, type=int)
 parser.add_argument('--time', help='time the simulation should run in seconds', type=int)
 parser.add_argument('--lpred', help='the number of predators', default=1, type=int)
