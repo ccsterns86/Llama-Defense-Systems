@@ -37,7 +37,7 @@ class Sheep(Agent):
             elif item == "perception":
                 self.perception_radius = values[item]
 
-    def move(self, predators):
+    def move(self, predators, water_bodies):
         if not self.is_alive:
             return
 
@@ -62,8 +62,11 @@ class Sheep(Agent):
         else: # Calm movement (default)
             self.max_speed = 1
         
-        # Move the sheep
-        self.position += self.velocity
+        # Tentatively move the sheep
+        next_position = self.position + self.velocity
+        if not any(w.contains((next_position.x, next_position.y)) for w in water_bodies):
+            self.position = next_position
+
         self.velocity += self.acceleration
         if self.velocity.length() > 0:
             self.velocity = self.velocity.normalize() * min(self.velocity.length(), self.max_speed)
@@ -85,7 +88,7 @@ class Sheep(Agent):
     def apply_force(self, force):
         self.acceleration += force
 
-    def edges(self):
+    def edges(self, water_bodies):
         if not self.is_alive:
             return
 
@@ -101,6 +104,12 @@ class Sheep(Agent):
             self.apply_force(pygame.Vector2(0, -turn_strength))
         elif self.position.y < buffer:
             self.apply_force(pygame.Vector2(0, turn_strength))
+
+        # Water repulsion
+        for water in water_bodies:
+            dist = pygame.Vector2(self.position.x - water.x, self.position.y - water.y)
+            if dist.length() < water.radius + self.size + 10:
+                self.apply_force(dist.normalize() * turn_strength)
     
     def flock(self, sheeps, predators):
         if not self.is_alive:

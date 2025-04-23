@@ -6,6 +6,7 @@ import UI
 from Sheep import Sheep
 from Llama import Llama
 from Predator import Predator
+from water import Water
 
 # Get the passed in values
 parser = ArgumentParser(prog="Llama Defense System")
@@ -13,9 +14,10 @@ parser.add_argument('--lcohesion', help='sets the cohesion value for the llama(s
 parser.add_argument('--lseparation', help='sets the separation value for the llama(s)', default=0.2, type=float)
 parser.add_argument('--ldefend', help='sets the defend value for the llama(s)', default=5.0, type=float)
 parser.add_argument('--lperception', help='sets the perception value for the llama(s)', default=225.0, type=float)
-parser.add_argument('--lnum', help='sets the number of llamas in the simulation', default=1, type=int)
+parser.add_argument('--lnum', help='sets the number of llamas in the simulation', default=2, type=int)
 parser.add_argument('--time', help='time the simulation should run in seconds', type=int)
 parser.add_argument('--lpred', help='the number of predators', default=1, type=int)
+parser.add_argument('--water_bodies', help='the number of bodies of water', default=0, type=int)
 
 args = parser.parse_args()
 
@@ -34,21 +36,42 @@ control_screen = UI.ControlScreen(args)
 font = pygame.font.SysFont(None, 24)
 updated_values, running, reset = control_screen.draw()
 
+# Bodies of water
+min_radius=30
+max_radius=80
+water_bodies = []
+for body in range(args.water_bodies):
+    radius = random.randint(min_radius, max_radius)
+    x = random.randint(radius, UI.WIDTH - radius)
+    y = random.randint(radius, UI.HEIGHT - radius)
+    water_bodies.append(Water(x,y,radius))
+
 # Create agents
+def spawn(num, Agent, size):
+    agents = []
+    for _ in range(num):
+        while True:
+            x = random.randint(100, UI.WIDTH - 100)
+            y = random.randint(100, UI.HEIGHT - 100)
+            if not any(w.contains((x,y)) for w in water_bodies):
+                agents.append(Agent(x, y, size, UI.screen, UI.WIDTH, UI.HEIGHT))
+                break
+    return agents
+
 num_sheep = updated_values['agents']['sheep']
-num_llamas = args.lnum
-num_predators = args.lpred
-sheep = [
-    Sheep(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 50, UI.screen, UI.WIDTH, UI.HEIGHT)
-    for _ in range(num_sheep)]
-llamas = [Llama(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 100, UI.screen, UI.WIDTH, UI.HEIGHT) for _ in range(num_llamas)]
-predators = [Predator(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 80, UI.screen, UI.WIDTH, UI.HEIGHT) for _ in range(num_predators)]
+sheep = spawn(num_sheep, Sheep, 50)
+llamas = spawn(args.lnum, Llama, 100)
+predators = [Predator(random.randint(100, UI.WIDTH - 100), random.randint(100, UI.HEIGHT - 100), 80, UI.screen, UI.WIDTH, UI.HEIGHT) for _ in range(args.lpred)]
 
 # Main loop
 running = True
 while running:
 
     UI.screen.blit(background, (0, 0))
+
+    # Draw water
+    for water in water_bodies:
+        water.draw(UI.screen)
 
     # Change number of agents 
     # Sheep
@@ -80,8 +103,8 @@ while running:
     for s in sheep:
         s.update_values(updated_values["sheep"])
         s.flock(sheep, predators)
-        s.move(predators)
-        s.edges()
+        s.move(predators, water_bodies)
+        s.edges(water_bodies)
         if s.is_alive:
             alive_sheep_count += 1
         s.draw()
@@ -89,8 +112,8 @@ while running:
     for l in llamas:
         l.update_values(updated_values["llama"])
         l.flock(sheep, llamas, predators)
-        l.move(predators)
-        l.edges()
+        l.move(predators, water_bodies)
+        l.edges(water_bodies)
         l.draw()
 
     predators_alive = False
@@ -103,10 +126,10 @@ while running:
                     p.is_spawned = True
                 p.update_values(updated_values["predator"])
                 p.flock(sheep, llamas, predators)
-                p.move(llamas)
+                p.move(llamas, water_bodies)
                 p.attack(sheep)
                 p.check_health(llamas)
-                p.edges()
+                p.edges(water_bodies)
             control_screen.set_display_vals(i, p.health)
             p.draw()
     else: predators_alive=True

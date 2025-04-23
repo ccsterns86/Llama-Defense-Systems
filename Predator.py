@@ -53,7 +53,7 @@ class Predator(Agent):
                 self.pack_strength = values[item]
 
 
-    def move(self, llamas):
+    def move(self, llamas, water_bodies):
 
         if not self.is_alive:
             return
@@ -82,7 +82,10 @@ class Predator(Agent):
             self.max_speed = 2
         
         # Move the predator
-        self.position += self.velocity
+        next_position = self.position + self.velocity
+        if not any(w.contains((next_position.x, next_position.y)) for w in water_bodies):
+            self.position = next_position
+        
         self.velocity += self.acceleration
         if self.velocity.length() > 0:
             self.velocity = self.velocity.normalize() * min(self.velocity.length(), self.max_speed)
@@ -92,17 +95,12 @@ class Predator(Agent):
     def apply_force(self, force):
         self.acceleration += force
 
-    def edges(self):
+    def edges(self, water_bodies):
 
         if not self.can_attack():
             return
 
         buffer = 50 # Buffer off screen allowed
-
-        # # Flip directions if it gets too far
-        # if (self.position.x < -1 * buffer or self.position.x > self.WIDTH + buffer or
-        #     self.position.y < -1 * buffer or self.position.y > self.HEIGHT + buffer):
-        #     self.velocity *= -1
 
         # Check if predator goes off-screen
         if (self.position.x < -buffer or self.position.x > self.WIDTH + buffer or 
@@ -117,6 +115,12 @@ class Predator(Agent):
         # Respawn after a delay
         if self.off_screen and (time.time() - self.off_screen_time > self.respawn_delay):
             self.respawn()
+
+        # Water repulsion
+        for water in water_bodies:
+            dist = pygame.Vector2(self.position.x - water.x, self.position.y - water.y)
+            if dist.length() < water.radius + self.size + 10:
+                self.apply_force(dist.normalize() * 0.3)
 
     def respawn(self):
 

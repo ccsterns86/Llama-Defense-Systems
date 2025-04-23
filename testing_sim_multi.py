@@ -6,26 +6,28 @@ import os
 import sys
 
 # Parameters to test
-parameters = ['Perception'] #['Cohesion', 'Separation', 'Defend', 'Perception']
+parameters = ['Water_Bodies'] #['LCohesion', 'LSeparation', 'LDefend', 'LPerception']
 values = {
-    'Cohesion': [0.0, 2.0], 
-    'Separation': [0.0, 3.0], 
-    'Defend': [0.0, 6.0], 
-    'Perception': [0, 300],
-    'num': [1, 5],
-    'pred': [1, 5]
+    'LCohesion': [0.0, 2.0], 
+    'LSeparation': [0.0, 3.0], 
+    'LDefend': [0.0, 6.0], 
+    'LPerception': [0, 300],
+    'Lnum': [1, 5],
+    'Lpred': [1, 5],
+    'Water_Bodies': [0,3],
 }
 runs_per_param = {
-    'Cohesion': 3,
-    'Separation': 4,
-    'Defend': 7,
-    'Perception': 5,
-    # 'num': 6
+    'LCohesion': 3,
+    'LSeparation': 4,
+    'LDefend': 7,
+    'LPerception': 5,
+    'Lnum': 6,
+    'Water_Bodies': 4,
 }
 time = '60' # Run the simulation for 60 seconds
 
 simulation_script = "Simulation.py"
-output_csv = "results_perception.csv"
+output_csv = "results_water.csv"
 
 # Regular expression to extract "Sheep Left" value
 sheep_regex = re.compile(r"Sheep Left: (\d+)")
@@ -39,8 +41,8 @@ with open(output_csv, mode='w', newline='') as file:
 
     for parameter in parameters:
       test_values = np.linspace(values[parameter][0], values[parameter][1], runs_per_param[parameter])
-      pred_values = np.linspace(values['pred'][0], values['pred'][1], 5)
-      num_values = np.linspace(values['num'][0], values['num'][1], 5)
+      pred_values = np.linspace(values['Lpred'][0], values['Lpred'][1], 5)
+      num_values = np.linspace(values['Lnum'][0], values['Lnum'][1], 5)
       num_runs = 5
 
       for val in test_values:
@@ -52,7 +54,7 @@ with open(output_csv, mode='w', newline='') as file:
                 result = subprocess.run(
                     [
                         "python", script_path, 
-                        f"--l{parameter.lower()}", str(int(val)),
+                        f"--{parameter.lower()}", str(int(val)),
                         "--time", time,
                         "--lpred", str(int(pred)),
                         "--lnum", str(int(num))
